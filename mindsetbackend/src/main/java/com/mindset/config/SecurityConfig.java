@@ -38,18 +38,20 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        // 회원가입, 로그인, 공개 리소스에 대한 접근 허용
-                        .requestMatchers("/api/auth/**", "/api/users", "/api/oauth2/**", "/", "/error").permitAll()
-                        // 공개된 기능 (비회원 접근 가능)
+                        // 회원가입, 로그인, cheerup, 공개 리소스는 모두 접근 허용
+                        .requestMatchers("/api/auth/**", "/api/cheerup/**", "/api/oauth2/**", "/", "/error").permitAll()
+                        // 공개 기능
                         .requestMatchers("/api/todos/public/**", "/api/timer/public/**").permitAll()
-                        // 그 외 모든 요청은 인증 필요
+                        // /api/users는 USER 역할을 가진 사용자만 접근 가능
+                        .requestMatchers("/api/users/**").hasRole("USER")
+                        // 나머지는 인증만 되면 접근 가능
                         .anyRequest().authenticated()
                 );
 
-        // JWT 인증 필터 추가
+        // JWT 필터 추가
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // CORS 설정 - WebConfig에서 관리하도록 함
+        // CORS 설정 (WebConfig에서 관리)
         http.cors(cors -> {});
 
         return http.build();
