@@ -43,14 +43,11 @@ bin/
 .DS_Store
 
 # 환경 설정 파일 제외 (보안 중요!)
-# 모든 properties 파일 제외하되, 기본 애플리케이션 설정은 포함
+# 모든 .properties 파일 제외
 *.properties
-!application.properties
-!gradle.properties
 
-# 모든 yml 파일 제외하되, 기본 애플리케이션 설정은 포함
+# 모든 .yml 파일 제외
 *.yml
-!application.yml
 
 # 환경별 설정 파일 제외
 application-*.properties
