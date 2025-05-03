@@ -50,23 +50,25 @@ const Home = () => {
 
   return (
     <div className={`transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
-      {/* Hero 섹션 */}
-      <section className="pt-24 pb-16 px-4 bg-white text-gray-800">
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">마인드SET과 함께 성장하세요</h1>
-          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-            공부와 운동을 체계적으로 관리하고 목표를 달성하기 위한 자기개발 플랫폼
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link to="/register" className="px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors">
-              시작하기
-            </Link>
-            <Link to="/login" className="px-6 py-3 bg-transparent border-2 border-orange-500 text-orange-500 font-semibold rounded-lg hover:bg-orange-50 transition-colors">
-              로그인
-            </Link>
-          </div>
-        </div>
-      </section>
+        <section className={`pt-24 pb-16 px-4 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
+            <div className="container mx-auto text-center">
+                <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                마인드SET과 함께 성장하세요
+                </h1>
+                <p className={`text-xl md:text-1xl mb-8 max-w-3xl mx-auto ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                공부와 운동을 체계적으로 관리하고 목표를 달성하기 위한 자기개발 플랫폼
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Link to="/register" className="px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors">
+                    시작하기
+                </Link>
+                <Link to="/login" className="px-6 py-3 bg-transparent border-2 border-orange-500 text-orange-500 font-semibold rounded-lg hover:bg-orange-50 transition-colors">
+                    로그인
+                </Link>
+                </div>
+            </div>
+        </section>
+
 
       {/* 기능 소개 섹션 */}
       <section className="py-16 px-4">

@@ -65,14 +65,24 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     try {
       setLoading(true);
       setError('');
-      const { confirmPassword, ...signupData } = formData;
-      await signup(signupData);
-      navigate('/');
+      
+      // 회원가입 요청
+      await signup(formData);
+      
+      // 회원가입 성공 후 로그인 페이지로 이동
+      navigate('/login', { 
+        state: { 
+          message: '회원가입이 완료되었습니다. 로그인해주세요.' 
+        } 
+      });
     } catch (err) {
       console.error('회원가입 오류:', err);
       setError(err.response?.data?.message || '회원가입에 실패했습니다.');
@@ -80,7 +90,7 @@ const Register = () => {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="mx-auto w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md my-8">
@@ -94,9 +104,7 @@ const Register = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* 이메일 */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              이메일 *
-            </label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">이메일 *</label>
             <input
               id="email"
               name="email"
@@ -110,9 +118,7 @@ const Register = () => {
 
           {/* 비밀번호 */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              비밀번호 *
-            </label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">비밀번호 *</label>
             <input
               id="password"
               name="password"
@@ -126,9 +132,7 @@ const Register = () => {
 
           {/* 비밀번호 확인 */}
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              비밀번호 확인 *
-            </label>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">비밀번호 확인 *</label>
             <input
               id="confirmPassword"
               name="confirmPassword"
@@ -142,9 +146,7 @@ const Register = () => {
 
           {/* 닉네임 */}
           <div>
-            <label htmlFor="nickname" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              닉네임 *
-            </label>
+            <label htmlFor="nickname" className="block text-sm font-medium text-gray-700 dark:text-gray-300">닉네임 *</label>
             <input
               id="nickname"
               name="nickname"
@@ -158,72 +160,67 @@ const Register = () => {
 
           {/* 성별 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              성별 *
-            </label>
-            <div className="mt-1 flex space-x-4">
-              <label className="inline-flex items-center">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">성별 *</label>
+            <div className="flex space-x-4">
+              <div className="flex items-center">
                 <input
                   type="radio"
+                  id="male"
                   name="gender"
                   value="M"
-                  checked={formData.gender === 'M'}
                   onChange={handleChange}
-                  className="focus:ring-orange-500 h-4 w-4 text-orange-500 border-gray-300"
+                  checked={formData.gender === 'M'}
+                  className="h-4 w-4 text-orange-500 focus:ring-0"
                 />
-                <span className="ml-2 text-gray-700 dark:text-gray-300">남성</span>
-              </label>
-              <label className="inline-flex items-center">
+                <label htmlFor="male" className="ml-2 text-sm">남성</label>
+              </div>
+              <div className="flex items-center">
                 <input
                   type="radio"
+                  id="female"
                   name="gender"
-                  value="F"
-                  checked={formData.gender === 'F'}
+                  value="F" 
                   onChange={handleChange}
-                  className="focus:ring-orange-500 h-4 w-4 text-orange-500 border-gray-300"
+                  checked={formData.gender === 'F'}
+                  className="h-4 w-4 text-orange-500 focus:ring-0"
                 />
-                <span className="ml-2 text-gray-700 dark:text-gray-300">여성</span>
-              </label>
+                <label htmlFor="female" className="ml-2 text-sm">여성</label>
+              </div>
             </div>
             {formErrors.gender && <p className="mt-1 text-sm text-red-500">{formErrors.gender}</p>}
           </div>
 
           {/* 전화번호 */}
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              전화번호
-            </label>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">전화번호</label>
             <input
               id="phone"
               name="phone"
               type="text"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="숫자만 입력 (예: 01012345678)"
               className={`mt-1 block w-full rounded-md border ${formErrors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-700 dark:text-white py-2 px-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500`}
             />
             {formErrors.phone && <p className="mt-1 text-sm text-red-500">{formErrors.phone}</p>}
           </div>
 
-          {/* 주소 검색 */}
+          {/* 주소 */}
           <div>
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              주소 *
-            </label>
-            <div className="flex gap-2">
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">주소 *</label>
+            <div className="flex space-x-2">
               <input
                 id="address"
                 name="address"
                 type="text"
                 value={formData.address}
                 onChange={handleChange}
-                readOnly
-                className={`mt-1 block w-full rounded-md border ${formErrors.address ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-700 dark:text-white py-2 px-3`}
+                disabled
+                className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3 focus:outline-none"
               />
               <button
                 type="button"
                 onClick={handleAddressSearch}
-                className="mt-1 px-4 py-2 text-sm rounded-md bg-orange-500 text-white hover:bg-orange-600"
+                className="bg-orange-500 text-white rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 주소 검색
               </button>
@@ -231,58 +228,51 @@ const Register = () => {
             {formErrors.address && <p className="mt-1 text-sm text-red-500">{formErrors.address}</p>}
           </div>
 
-          {/* 상세 주소 */}
+          {/* 상세주소 */}
           <div>
-            <label htmlFor="addressDetail" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              상세 주소 *
-            </label>
+            <label htmlFor="addressDetail" className="block text-sm font-medium text-gray-700 dark:text-gray-300">상세주소 *</label>
             <input
               id="addressDetail"
               name="addressDetail"
               type="text"
               value={formData.addressDetail}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border ${formErrors.addressDetail ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-700 dark:text-white py-2 px-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500`}
+              className={`mt-1 block w-full rounded-md border ${formErrors.addressDetail ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-700 dark:text-white py-2 px-3 focus:outline-none`}
             />
             {formErrors.addressDetail && <p className="mt-1 text-sm text-red-500">{formErrors.addressDetail}</p>}
           </div>
 
           {/* 우편번호 */}
           <div>
-            <label htmlFor="postCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              우편번호 *
-            </label>
+            <label htmlFor="postCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">우편번호 *</label>
             <input
               id="postCode"
               name="postCode"
               type="text"
               value={formData.postCode}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border ${formErrors.postCode ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-700 dark:text-white py-2 px-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500`}
+              disabled
+              className={`mt-1 block w-full rounded-md border ${formErrors.postCode ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-700 dark:text-white py-2 px-3 focus:outline-none`}
             />
             {formErrors.postCode && <p className="mt-1 text-sm text-red-500">{formErrors.postCode}</p>}
           </div>
 
-          {/* 회원가입 버튼 */}
-          <div className="pt-2">
+          {/* 가입 버튼 */}
+          <div className="mt-6">
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
-              style={{ backgroundColor: loading ? '#ccc' : getColor('primary') }}
+              className="w-full bg-orange-500 text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
-              {loading ? '가입 중...' : '회원가입'}
+              {loading ? '회원가입 중...' : '회원가입'}
             </button>
           </div>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            이미 계정이 있으신가요?{' '}
-            <Link to="/login" className="font-medium text-orange-500 hover:text-orange-600" style={{ color: getColor('primary') }}>
-              로그인
-            </Link>
-          </p>
+        <div className="mt-4 text-center">
+          <Link to="/login" className="text-sm text-gray-600 dark:text-gray-300 hover:underline">
+            이미 계정이 있으신가요? 로그인
+          </Link>
         </div>
       </div>
     </div>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mindset.mapper.UserMapper">
+
+    <!-- 사용자 결과 매핑 -->
+    <resultMap id="UserResultMap" type="com.mindset.model.dto.User">
+        <id property="userId" column="user_id" />
+        <result property="email" column="email" />
+        <result property="password" column="password" />
+        <result property="nickname" column="nickname" />
+        <result property="gender" column="gender" />
+        <result property="phone" column="phone" />
+        <result property="address" column="address" />
+        <result property="addressDetail" column="address_detail" />
+        <result property="postCode" column="post_code" />
+        <result property="profileImage" column="profile_image" />
+        <result property="role" column="role" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <!-- 공통 사용자 칼럼 -->
+    <sql id="userColumns">
+        user_id, email, password, nickname, gender, phone,
+        address, address_detail, post_code, profile_image, role,
+        created_at, updated_at
+    </sql>
+
+    <!-- 모든 사용자 조회 -->
+    <select id="findAll" resultMap="UserResultMap">
+        SELECT <include refid="userColumns" />
+        FROM users
+    </select>
+
+    <!-- ID로 사용자 조회 -->
+    <select id="findById" parameterType="Long" resultMap="UserResultMap">
+        SELECT <include refid="userColumns" />
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 이메일로 사용자 조회 -->
+    <select id="findByEmail" parameterType="String" resultMap="UserResultMap">
+        SELECT <include refid="userColumns" />
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <!-- 사용자 등록 -->
+    <insert id="save" parameterType="com.mindset.model.dto.User" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO users (
+        email, password, nickname, gender, phone,
+        address, address_detail, post_code, profile_image, role
+        ) VALUES (
+        #{email}, #{password}, #{nickname}, #{gender}, #{phone},
+        #{address}, #{addressDetail}, #{postCode}, #{profileImage}, #{role}
+        )
+    </insert>
+
+    <!-- 사용자 정보 수정 -->
+    <update id="update" parameterType="com.mindset.model.dto.User">
+        UPDATE users
+        SET
+        nickname = #{nickname},
+        gender = #{gender},
+        phone = #{phone},
+        address = #{address},
+        address_detail = #{addressDetail},
+        post_code = #{postCode},
+        profile_image = #{profileImage},
+        updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 사용자 삭제 -->
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM users
+        WHERE user_id = #{userId}
+    </delete>
+</mapper>

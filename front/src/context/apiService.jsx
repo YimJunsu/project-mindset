@@ -29,6 +29,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API 오류:', error);
+    
     if (error.response && error.response.status === 401) {
       // 로그인 페이지로 리다이렉트
       localStorage.removeItem('token');
