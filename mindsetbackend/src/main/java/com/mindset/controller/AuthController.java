@@ -1,53 +1,49 @@
 package com.mindset.controller;
 
+import com.mindset.model.response.AuthResponse;
 import com.mindset.model.request.LoginRequest;
 import com.mindset.model.request.SignupRequest;
 import com.mindset.model.dto.User;
-import com.mindset.model.response.AuthResponse;
 import com.mindset.service.AuthService;
-import com.mindset.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * 인증 관련 요청을 처리하는 컨트롤러
- * 로그인, 회원가입 등의 인증 처리를 담당
- */
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    private final UserService userService;
     private final AuthService authService;
-
-    @Autowired
-    public AuthController(UserService userService, AuthService authService) {
-        this.userService = userService;
-        this.authService = authService;
-    }
 
     /**
      * 회원가입 처리
      */
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> signup(@RequestBody SignupRequest signupRequest) {
-        // UserDto로 변환
-        User user = new User();
-        user.setEmail(signupRequest.getEmail());
-        user.setPassword(signupRequest.getPassword());
-        user.setNickname(signupRequest.getNickname());
-        user.setGender(signupRequest.getGender());
-        user.setPhone(signupRequest.getPhone());
-        user.setAddress(signupRequest.getAddress());
-        user.setAddressDetail(signupRequest.getAddressDetail());
-        user.setPostCode(signupRequest.getPostCode());
-        user.setProfileImage(signupRequest.getProfileImage());
+    public ResponseEntity<User> signup(@RequestBody SignupRequest signupRequest) {
+        log.info("회원가입 요청: {}", signupRequest.getEmail());
 
-        // 회원가입 처리 및 JWT 토큰 발급
-        AuthResponse authResponse = authService.signup(user);
+        // SignupRequest를 User로 변환
+        User user = User.builder()
+                .email(signupRequest.getEmail())
+                .password(signupRequest.getPassword())
+                .nickname(signupRequest.getNickname())
+                .gender(signupRequest.getGender())
+                .phone(signupRequest.getPhone())
+                .address(signupRequest.getAddress())
+                .addressDetail(signupRequest.getAddressDetail())
+                .postCode(signupRequest.getPostCode())
+                .build();
 
-        return ResponseEntity.ok(authResponse);
+        // 회원가입 처리
+        User savedUser = authService.signup(user);
+
+        // 비밀번호는 응답에서 제외
+        savedUser.setPassword(null);
+
+        return ResponseEntity.ok(savedUser);
     }
 
     /**
@@ -55,6 +51,8 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
+        log.info("로그인 요청: {}", loginRequest.getEmail());
+
         // 로그인 처리 및 JWT 토큰 발급
         AuthResponse authResponse = authService.login(loginRequest.getEmail(), loginRequest.getPassword());
 

@@ -26,34 +26,35 @@
         created_at, updated_at
     </sql>
 
+    <!-- 이메일로 사용자 조회 -->
+    <select id="findByEmail" resultMap="UserResultMap">
+        SELECT <include refid="userColumns" />
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <!-- ID로 사용자 조회 -->
+    <select id="findById" resultMap="UserResultMap">
+        SELECT <include refid="userColumns" />
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
     <!-- 모든 사용자 조회 -->
     <select id="findAll" resultMap="UserResultMap">
         SELECT <include refid="userColumns" />
         FROM users
     </select>
 
-    <!-- ID로 사용자 조회 -->
-    <select id="findById" parameterType="Long" resultMap="UserResultMap">
-        SELECT <include refid="userColumns" />
-        FROM users
-        WHERE user_id = #{userId}
-    </select>
-
-    <!-- 이메일로 사용자 조회 -->
-    <select id="findByEmail" parameterType="String" resultMap="UserResultMap">
-        SELECT <include refid="userColumns" />
-        FROM users
-        WHERE email = #{email}
-    </select>
-
-    <!-- 사용자 등록 -->
+    <!-- 사용자 정보 등록 -->
     <insert id="save" parameterType="com.mindset.model.dto.User" useGeneratedKeys="true" keyProperty="userId">
         INSERT INTO users (
         email, password, nickname, gender, phone,
         address, address_detail, post_code, profile_image, role
         ) VALUES (
         #{email}, #{password}, #{nickname}, #{gender}, #{phone},
-        #{address}, #{addressDetail}, #{postCode}, #{profileImage}, #{role}
+        #{address}, #{addressDetail}, #{postCode},
+        IFNULL(#{profileImage}, 'default.png'), #{role}
         )
     </insert>
 
@@ -67,13 +68,13 @@
         address = #{address},
         address_detail = #{addressDetail},
         post_code = #{postCode},
-        profile_image = #{profileImage},
+        profile_image = IFNULL(#{profileImage}, profile_image),
         updated_at = NOW()
         WHERE user_id = #{userId}
     </update>
 
     <!-- 사용자 삭제 -->
-    <delete id="deleteById" parameterType="Long">
+    <delete id="deleteById">
         DELETE FROM users
         WHERE user_id = #{userId}
     </delete>

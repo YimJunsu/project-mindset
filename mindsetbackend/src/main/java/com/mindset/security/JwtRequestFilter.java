@@ -41,7 +41,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            logger.error("인증 정보를 설정할 수 없습니다: {}");
+            logger.error("인증 정보를 설정할 수 없습니다");
         }
 
         // 다음 필터로 요청 전달

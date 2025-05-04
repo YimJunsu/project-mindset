@@ -57,23 +57,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 회원가입 처리
-  const signup = async (userData) => {
-    try {
-      setError(null);
-      console.log('회원가입 요청 데이터:', userData);
-      
-      const response = await authAPI.signup(userData);
-      console.log('회원가입 성공:', response.data);
-      
-      const { token, ...newUser } = response.data;
-      
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(newUser));
-      
-      setUser(newUser);
-      return newUser;
-    } catch (err) {
+  // 회원가입 처리 (자동 로그인 없이)
+const signup = async (userData) => {
+  try {
+    setError(null);
+    console.log('회원가입 요청 데이터:', userData);
+        
+    const response = await authAPI.signup(userData);
+    console.log('회원가입 성공:', response.data);
+    
+    // 토큰 저장과 사용자 설정 없이 데이터만 반환
+    return response.data;
+  } catch (err) {
       console.error('회원가입 오류:', err);
       setError(err.response?.data?.message || '회원가입에 실패했습니다.');
       throw err;

@@ -79,7 +79,7 @@ const Home = () => {
 
       {/* 로그인 여부에 따라 첫 섹션 분기 */}
       {isAuthenticated ? ( // ✅ 변경: isLoggedIn → isAuthenticated
-        <section className={`pt-24 pb-16 px-4 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
+        <section className={`pt-36 pb-16 px-4 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
           <div className="container mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">오늘의 응원 한 마디</h1>
 
@@ -99,7 +99,7 @@ const Home = () => {
               </div>
         </section>
       ) : (
-        <section className={`pt-24 pb-16 px-4 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
+        <section className={`pt-36 pb-16 px-4 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
           <div className="container mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">마인드SET과 함께 성장하세요</h1>
             <p className="text-xl md:text-1xl mb-8 max-w-3xl mx-auto">

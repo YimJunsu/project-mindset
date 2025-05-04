@@ -21,5 +21,4 @@ public class SignupRequest {
     private String address;         // 기본 주소
     private String addressDetail;   // 상세 주소
     private String postCode;        // 우편번호
-    private String profileImage;    // 프로필 이미지 URL
 }

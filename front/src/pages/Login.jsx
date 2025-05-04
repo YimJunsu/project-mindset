@@ -128,7 +128,7 @@ const Login = () => {
       <p className="text-sm text-gray-600 dark:text-gray-400">
         계정이 없으신가요?{' '}
         <Link
-          to="/signup"
+          to="/register"
           className="font-medium text-orange-500 hover:text-orange-600"
           style={{ color: getColor('primary') }}
         >

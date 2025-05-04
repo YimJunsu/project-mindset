@@ -92,7 +92,7 @@ const Register = () => {
   };
   
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 py-20">
       <div className="mx-auto w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md my-8">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">회원가입</h2>
