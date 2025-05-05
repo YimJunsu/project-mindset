@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import MyPage from './pages/MyPage';
 import Home from './pages/Home';
+import TimerPage from './pages/study/Timer'; // TimerPage 추가
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import PrivateRoute from './components/common/PrivateRoute';
@@ -27,6 +28,7 @@ const App = () => {
                     <MyPage />
                   </PrivateRoute>
                 } />
+                <Route path="/study/timer" element={<TimerPage />} /> {/* 추가된 경로 */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>

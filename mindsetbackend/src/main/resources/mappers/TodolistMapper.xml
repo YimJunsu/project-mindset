@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mindset.mapper.TodolistMapper">
+
+    <resultMap id="TodolistResultMap" type="com.mindset.model.dto.Todolist">
+        <id property="todoId" column="todo_id" />
+        <result property="userId" column="user_id" />
+        <result property="content" column="content" />
+        <result property="isCompleted" column="is_completed" />
+        <result property="completedAt" column="completed_at" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <sql id="todolistColumns">
+        todo_id, user_id, content, is_completed, completed_at, created_at
+    </sql>
+
+    <insert id="createTodolist" parameterType="com.mindset.model.dto.Todolist">
+        INSERT INTO todolist (user_id, content, is_completed, created_at)
+        VALUES (#{userId}, #{content}, #{isCompleted}, #{createdAt})
+    </insert>
+
+    <select id="findAllByUserId" parameterType="long" resultMap="TodolistResultMap">
+        SELECT <include refid="todolistColumns" />
+        FROM todolist
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="findTodolistById" parameterType="long" resultMap="TodolistResultMap">
+        SELECT <include refid="todolistColumns" />
+        FROM todolist
+        WHERE todo_id = #{todoId}
+    </select>
+
+    <update id="updateTodolistStatus">
+        UPDATE todolist
+        SET is_completed = #{isCompleted},
+        completed_at = NOW()
+        WHERE todo_id = #{todoId}
+    </update>
+
+    <delete id="deleteTodolist" parameterType="long">
+        DELETE FROM todolist WHERE todo_id = #{todoId}
+    </delete>
+
+</mapper>
