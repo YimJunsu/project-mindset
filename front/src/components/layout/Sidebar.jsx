@@ -28,8 +28,8 @@ const Sidebar = () => {
             </button>
             {studyOpen && (
               <div className="mt-2 flex flex-col space-y-2 text-base font-normal ml-4">
-                <Link to="/study/todolist" onClick={toggleSidebar} className="block hover:text-orange-500">ToDoList</Link>
                 <Link to="/study/timer" onClick={toggleSidebar} className="block hover:text-orange-500">타이머</Link>
+                <Link to="/study/Todolist" onClick={toggleSidebar} className="block hover:text-orange-500">ToDoList</Link>
                 <Link to="/study/record" onClick={toggleSidebar} className="block hover:text-orange-500">공부기록</Link>
                 <Link to="/questions" onClick={toggleSidebar} className="block hover:text-orange-500">질문</Link>
               </div>

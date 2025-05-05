@@ -36,7 +36,7 @@ const Todolist = () => {
       setError(null);
     } catch (err) {
       console.error('Todo 목록 조회 오류:', err);
-      setError('할 일 목록을 불러오는데 실패했습니다.');
+      setError('할 일 목록을 불러오는데 실패했습니다!');
     } finally {
       setLoading(false);
     }
@@ -55,7 +55,7 @@ const Todolist = () => {
       setTodos([...todos, response.data]); // 기존 목록에 새 할 일 추가
     } catch (err) {
       console.error('Todo 추가 오류:', err);
-      setError('할 일을 추가하는데 실패했습니다.');
+      setError('할 일을 추가하는데 실패했습니다!');
     }
   };
 
