@@ -3,92 +3,162 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import api from '../../context/apiService';
+import todoAPI from '../../context/todoAPI';
 import TodoItem from '../../components/todo/TodoItem';
 import TodoForm from '../../components/todo/TodoForm';
 import TodoFilter from '../../components/todo/TodoFilter';
 
 const Todolist = () => {
   // 사용자 정보와 테마 색상 가져오기
-  const { user } = useAuth();
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
   const { getColor } = useTheme();
   const navigate = useNavigate();
 
   // 상태 관리
-  const [todos, setTodos] = useState([]); // 할 일 목록
-  const [loading, setLoading] = useState(true); // 로딩 상태
-  const [error, setError] = useState(null); // 오류 메시지
-  const [filter, setFilter] = useState('all'); // 필터 ('all', 'active', 'completed')
-  
-  // 컴포넌트가 마운트되거나 user가 변경될 때 할 일 목록 가져오기
-  useEffect(() => {
-    if (user && user.id) {
-      fetchTodos();
-    }
-  }, [user]);
+  const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState('all');
 
-  // 할 일 목록 가져오기 API 호출
+  // 컴포넌트 마운트 시 인증 확인 및 할 일 목록 가져오기
+  useEffect(() => {
+    // 인증 로딩이 완료되었는지 확인
+    if (!authLoading) {
+      // 로그인 상태 확인
+      if (!isAuthenticated) {
+        console.log("인증되지 않은 사용자입니다. 로그인 페이지로 이동합니다.");
+        navigate('/login');
+        return;
+      }
+
+      // 사용자 정보가 있는지 확인
+      if (user && user.userId) {
+        console.log(`사용자 ID: ${user.userId}로 할 일 목록 조회 시작`);
+        fetchTodos();
+      } else {
+        console.log("사용자 정보가 없습니다.");
+        setLoading(false);
+        setError("사용자 정보를 불러올 수 없습니다.");
+      }
+    }
+  }, [user, authLoading, isAuthenticated, navigate]);
+
+  // 할 일 목록 가져오기
   const fetchTodos = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/todo/${user.id}`);
+      console.log(`할 일 목록 조회 - 사용자 ID: ${user.userId}`);
+      
+      const response = await todoAPI.getTodosByUser(user.userId);
+      console.log("할 일 목록 응답:", response.data);
+      
       setTodos(response.data);
       setError(null);
     } catch (err) {
-      console.error('Todo 목록 조회 오류:', err);
-      setError('할 일 목록을 불러오는데 실패했습니다!');
+      console.error("할 일 목록 조회 오류:", err);
+      
+      // 401 오류인 경우 로그인 페이지로 리다이렉트
+      if (err.response && err.response.status === 401) {
+        console.log("인증이 만료되었습니다. 로그인 페이지로 이동합니다.");
+        navigate('/login');
+        return;
+      }
+      
+      setError("할 일 목록을 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
   };
 
-  // 새 할 일 추가
-  const addTodo = async (newTodo) => {
+  // 할 일 추가
+  const addTodo = async (content) => {
     try {
+      if (!user || !user.userId) {
+        setError("사용자 정보를 불러올 수 없습니다.");
+        return;
+      }
+      
+      console.log("할 일 추가 시작:", content);
+      
+      // 요청 데이터 구성
       const todoData = {
-        userId: user.id,
-        content: newTodo.content,
+        userId: user.userId,
+        content: content,
         isCompleted: false
       };
-
-      const response = await api.post('/todo/save', todoData);
-      setTodos([...todos, response.data]); // 기존 목록에 새 할 일 추가
+      
+      console.log("할 일 추가 요청 데이터:", todoData);
+      
+      const response = await todoAPI.createTodo(todoData);
+      console.log("할 일 추가 응답:", response.data);
+      
+      // 할 일 목록 새로고침
+      fetchTodos();
     } catch (err) {
-      console.error('Todo 추가 오류:', err);
-      setError('할 일을 추가하는데 실패했습니다!');
+      console.error("할 일 추가 오류:", err);
+      
+      // 401 오류인 경우 로그인 페이지로 리다이렉트
+      if (err.response && err.response.status === 401) {
+        console.log("인증이 만료되었습니다. 로그인 페이지로 이동합니다.");
+        navigate('/login');
+        return;
+      }
+      
+      setError("할 일을 추가하는데 실패했습니다.");
     }
   };
 
-  // 할 일 완료/미완료 상태 토글
+  // 할 일 상태 토글 (완료/미완료)
   const toggleTodoStatus = async (todo) => {
     try {
+      console.log(`할 일 상태 토글 - ID: ${todo.todoId}, 현재 상태: ${todo.isCompleted}`);
+      
+      // 요청 데이터 구성
       const updatedTodo = {
-        ...todo,
-        isCompleted: !todo.isCompleted,
-        completedAt: !todo.isCompleted ? new Date().toISOString() : null
+        todoId: todo.todoId,
+        userId: user.userId,
+        content: todo.content,
+        isCompleted: !todo.isCompleted
       };
       
-      await api.put(`/todo/status/${todo.todoId}`, updatedTodo);
+      await todoAPI.updateTodoStatus(todo.todoId, updatedTodo);
       
-      // 상태 업데이트
-      setTodos(todos.map(t => 
-        t.todoId === todo.todoId ? updatedTodo : t
-      ));
+      // 할 일 목록 새로고침
+      fetchTodos();
     } catch (err) {
-      console.error('Todo 상태 변경 오류:', err);
-      setError('할 일 상태를 변경하는데 실패했습니다.');
+      console.error("할 일 상태 변경 오류:", err);
+      
+      // 401 오류인 경우 로그인 페이지로 리다이렉트
+      if (err.response && err.response.status === 401) {
+        console.log("인증이 만료되었습니다. 로그인 페이지로 이동합니다.");
+        navigate('/login');
+        return;
+      }
+      
+      setError("할 일 상태를 변경하는데 실패했습니다.");
     }
   };
 
   // 할 일 삭제
   const deleteTodo = async (todoId) => {
     try {
-      await api.delete(`/todo/${todoId}`);
-      // 삭제된 할 일을 제외한 목록으로 상태 업데이트
-      setTodos(todos.filter(todo => todo.todoId !== todoId));
+      console.log(`할 일 삭제 - ID: ${todoId}`);
+      
+      await todoAPI.deleteTodo(todoId);
+      
+      // 할 일 목록 새로고침
+      fetchTodos();
     } catch (err) {
-      console.error('Todo 삭제 오류:', err);
-      setError('할 일을 삭제하는데 실패했습니다.');
+      console.error("할 일 삭제 오류:", err);
+      
+      // 401 오류인 경우 로그인 페이지로 리다이렉트
+      if (err.response && err.response.status === 401) {
+        console.log("인증이 만료되었습니다. 로그인 페이지로 이동합니다.");
+        navigate('/login');
+        return;
+      }
+      
+      setError("할 일을 삭제하는데 실패했습니다.");
     }
   };
 
@@ -105,7 +175,7 @@ const Todolist = () => {
   });
 
   // 로딩 중일 때 표시할 UI
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
@@ -114,12 +184,9 @@ const Todolist = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-40 p-4">
+
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 dark:text-white">
-          할 일 목록
-        </h1>
-        
         {/* 오류 메시지 */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -138,7 +205,7 @@ const Todolist = () => {
         {/* 할 일 목록 */}
         <div className="mt-6 space-y-4">
           {filteredTodos.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-400">할 일이 없습니다.</p>
+            <p className="text-center text-gray-500 pt-20 dark:text-gray-400">오늘의 계획을 세워보세요!</p>
           ) : (
             filteredTodos.map(todo => (
               <TodoItem 

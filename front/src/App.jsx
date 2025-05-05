@@ -51,15 +51,11 @@ const App = () => {
                     </PrivateRoute>
                   }
                 />
-                <Route
-                  path="/study/TodoDetail"
-                  element={
-                    <PrivateRoute>
-                      <TodoDetail />
-                    </PrivateRoute>
-                  }
-                />
-
+                <Route path="/study/todo/detail/:todoId" element={
+                <PrivateRoute>
+                  <TodoDetail />
+                </PrivateRoute>
+              } />
                 {/* 404 처리 */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

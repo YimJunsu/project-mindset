@@ -20,8 +20,8 @@ const TodoForm = ({ onAddTodo, getColor }) => {
       return;
     }
     
-    // 부모 컴포넌트의 onAddTodo 함수 호출
-    onAddTodo({ content });
+    // 부모 컴포넌트의 onAddTodo 함수 호출 - 내용만 전달
+    onAddTodo(content.trim());
     
     // 폼 초기화
     setContent('');
@@ -38,7 +38,7 @@ const TodoForm = ({ onAddTodo, getColor }) => {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onFocus={() => setIsExpanded(true)}
-            placeholder="할 일을 입력하세요"
+            placeholder="계획을 입력해보세요!"
             className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
             style={{ 
               '--tw-ring-color': getColor('primary'),
@@ -79,7 +79,7 @@ const TodoForm = ({ onAddTodo, getColor }) => {
               '--tw-ring-color': getColor('primary')
             }}
           >
-            {isExpanded ? '추가하기' : '+ 할 일 추가'}
+            {isExpanded ? '추가하기' : '+ 계획 추가'}
           </button>
         </div>
       </form>

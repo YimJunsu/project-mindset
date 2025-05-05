@@ -52,7 +52,7 @@ const Home = () => {
       icon: <FaBook />,
       title: "공부 관리",
       description: "투두리스트로 계획하고, 타이머로 집중하며, 메모장에 기록하세요.",
-      link: "/study"
+      link: "/study/todolist"
     },
     {
       icon: <FaDumbbell />,

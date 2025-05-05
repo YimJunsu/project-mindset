@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import api from '../../context/apiService';
+import todoAPI from '../../context/todoAPI';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
@@ -13,7 +13,7 @@ const TodoDetail = () => {
   const navigate = useNavigate();
   
   // 인증, 테마 컨텍스트 사용
-  const { user } = useAuth();
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
   const { getColor } = useTheme();
   
   // 상태 관리
@@ -23,22 +23,60 @@ const TodoDetail = () => {
   const [error, setError] = useState(null);
   const [content, setContent] = useState('');
   
-  // 컴포넌트 마운트 시 할 일 상세 정보 가져오기
+  // 컴포넌트 마운트 시 인증 확인 및 할 일 상세 정보 가져오기
   useEffect(() => {
-    fetchTodoDetail();
-  }, [todoId]);
+    // 인증 로딩이 완료되었는지 확인
+    if (!authLoading) {
+      // 로그인 상태 확인
+      if (!isAuthenticated) {
+        console.log("인증되지 않은 사용자입니다. 로그인 페이지로 이동합니다.");
+        navigate('/login');
+        return;
+      }
+
+      // 사용자 정보가 있는지 확인
+      if (user && user.userId) {
+        console.log(`할 일 상세 조회 시작 - ID: ${todoId}`);
+        fetchTodoDetail();
+      } else {
+        console.log("사용자 정보가 없습니다.");
+        setLoading(false);
+        setError("사용자 정보를 불러올 수 없습니다.");
+      }
+    }
+  }, [todoId, user, authLoading, isAuthenticated, navigate]);
   
-  // 할 일 상세 정보 가져오기 API 호출
+  // 할 일 상세 정보 가져오기
   const fetchTodoDetail = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/todo/detail/${todoId}`);
+      console.log(`할 일 상세 조회 - ID: ${todoId}`);
+      
+      const response = await todoAPI.getTodoDetail(todoId);
+      console.log("할 일 상세 응답:", response.data);
+      
+      // 자신의 할 일인지 확인
+      if (response.data.userId !== user.userId) {
+        console.error("권한이 없습니다. 다른 사용자의 할 일입니다.");
+        setError("이 할 일에 접근할 권한이 없습니다.");
+        setLoading(false);
+        return;
+      }
+      
       setTodo(response.data);
       setContent(response.data.content);
       setError(null);
     } catch (err) {
-      console.error('Todo 상세 조회 오류:', err);
-      setError('할 일 정보를 불러오는데 실패했습니다.');
+      console.error("할 일 상세 조회 오류:", err);
+      
+      // 401 오류인 경우 로그인 페이지로 리다이렉트
+      if (err.response && err.response.status === 401) {
+        console.log("인증이 만료되었습니다. 로그인 페이지로 이동합니다.");
+        navigate('/login');
+        return;
+      }
+      
+      setError("할 일 정보를 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -51,18 +89,33 @@ const TodoDetail = () => {
     }
     
     try {
+      console.log(`할 일 업데이트 - ID: ${todoId}, 내용: ${content}`);
+      
+      // 요청 데이터 구성
       const updatedTodo = {
-        ...todo,
-        content: content
+        todoId: todoId,
+        userId: user.userId,
+        content: content,
+        isCompleted: todo.isCompleted
       };
       
-      await api.put(`/todo/status/${todoId}`, updatedTodo);
-      setTodo(updatedTodo);
+      await todoAPI.updateTodoStatus(todoId, updatedTodo);
+      
+      // 할 일 정보 갱신
+      setTodo({...todo, content: content});
       setIsEditing(false);
       setError(null);
     } catch (err) {
-      console.error('Todo 업데이트 오류:', err);
-      setError('할 일을 업데이트하는데 실패했습니다.');
+      console.error("할 일 업데이트 오류:", err);
+      
+      // 401 오류인 경우 로그인 페이지로 리다이렉트
+      if (err.response && err.response.status === 401) {
+        console.log("인증이 만료되었습니다. 로그인 페이지로 이동합니다.");
+        navigate('/login');
+        return;
+      }
+      
+      setError("할 일을 업데이트하는데 실패했습니다.");
     }
   };
   
@@ -73,28 +126,55 @@ const TodoDetail = () => {
     }
     
     try {
-      await api.delete(`/todo/${todoId}`);
-      navigate('/study/todo');
+      console.log(`할 일 삭제 - ID: ${todoId}`);
+      
+      await todoAPI.deleteTodo(todoId);
+      
+      // 목록 페이지로 이동
+      navigate('/study/todolist');
     } catch (err) {
-      console.error('Todo 삭제 오류:', err);
-      setError('할 일을 삭제하는데 실패했습니다.');
+      console.error("할 일 삭제 오류:", err);
+      
+      // 401 오류인 경우 로그인 페이지로 리다이렉트
+      if (err.response && err.response.status === 401) {
+        console.log("인증이 만료되었습니다. 로그인 페이지로 이동합니다.");
+        navigate('/login');
+        return;
+      }
+      
+      setError("할 일을 삭제하는데 실패했습니다.");
     }
   };
   
-  // 할 일 완료/미완료 상태 토글
+  // toggleStatus 함수 수정
   const toggleStatus = async () => {
     try {
+      console.log(`할 일 상태 토글 - ID: ${todoId}, 현재 상태: ${todo.isCompleted}`);
+      
+      // 요청 데이터 구성
       const updatedTodo = {
-        ...todo,
-        isCompleted: !todo.isCompleted,
-        completedAt: !todo.isCompleted ? new Date().toISOString() : null
+        todoId: todoId,
+        userId: user.userId,
+        content: todo.content,
+        isCompleted: !todo.isCompleted
       };
       
-      await api.put(`/todo/status/${todoId}`, updatedTodo);
-      setTodo(updatedTodo);
+      await todoAPI.updateTodoStatus(todoId, updatedTodo);
+      
+      // 상태 변경 후 목록 페이지로 이동
+      console.log("상태 변경 완료, 목록 페이지로 이동합니다.");
+      navigate('/study/todolist');
     } catch (err) {
-      console.error('Todo 상태 변경 오류:', err);
-      setError('할 일 상태를 변경하는데 실패했습니다.');
+      console.error("할 일 상태 변경 오류:", err);
+      
+      // 401 오류인 경우 로그인 페이지로 리다이렉트
+      if (err.response && err.response.status === 401) {
+        console.log("인증이 만료되었습니다. 로그인 페이지로 이동합니다.");
+        navigate('/login');
+        return;
+      }
+      
+      setError("할 일 상태를 변경하는데 실패했습니다.");
     }
   };
   
@@ -112,7 +192,7 @@ const TodoDetail = () => {
   };
   
   // 로딩 중일 때 표시할 UI
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
@@ -159,19 +239,8 @@ const TodoDetail = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-40 p-4">
       <div className="max-w-2xl mx-auto">
-        {/* 헤더 */}
-        <div className="flex items-center mb-6">
-          <button
-            onClick={() => navigate('/study/todo')}
-            className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            &larr; 목록으로
-          </button>
-          <h1 className="text-2xl font-bold text-center flex-grow text-gray-800 dark:text-white">할 일 상세</h1>
-        </div>
-        
         {/* 할 일 상세 정보 */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border dark:border-gray-700">
           {isEditing ? (
@@ -235,6 +304,12 @@ const TodoDetail = () => {
               
               <div className="flex justify-between items-center mt-6">
                 <button
+                    onClick={() => navigate('/study/todolist')}
+                    className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                  &larr; 목록으로
+                </button>
+                <button
                   onClick={toggleStatus}
                   className={`px-4 py-2 text-sm font-medium rounded-md ${
                     todo.isCompleted
@@ -245,19 +320,18 @@ const TodoDetail = () => {
                 >
                   {todo.isCompleted ? '미완료로 표시' : '완료로 표시'}
                 </button>
-                
                 <div>
                   <button
                     onClick={() => setIsEditing(true)}
                     className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mr-2"
                   >
-                    수정
+                    수정하기
                   </button>
                   <button
                     onClick={handleDelete}
                     className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                   >
-                    삭제
+                    삭제하기
                   </button>
                 </div>
               </div>

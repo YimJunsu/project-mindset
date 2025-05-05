@@ -11,30 +11,44 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   // 초기 로드 시 로컬 스토리지에서 사용자 정보 가져오기
-  useEffect(() => {
-    const loadUser = async () => {
-      const storedUser = localStorage.getItem('user');
-      const token = localStorage.getItem('token');
-
-      if (storedUser && token) {
-        try {
-          setUser(JSON.parse(storedUser));
-          
-          // 토큰 유효성 검증을 위해 프로필 정보 요청
-          const response = await userAPI.getMyProfile();
-          setUser(response.data);
-          localStorage.setItem('user', JSON.stringify(response.data));
-        } catch (err) {
-          console.error('인증 정보 검증 실패:', err);
-          logout();
-        }
+useEffect(() => {
+  const loadUser = async () => {
+    console.log("AuthContext - 사용자 정보 로드 시작");
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    
+    console.log("AuthContext - localStorage에서 가져온 사용자 정보:", storedUser);
+    console.log("AuthContext - localStorage에서 가져온 토큰 존재 여부:", !!token);
+    
+    if (storedUser && token) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        console.log("AuthContext - 파싱된 사용자 정보:", parsedUser);
+        console.log("AuthContext - 사용자 ID 존재 여부:", !!parsedUser.id);
+        
+        setUser(parsedUser);
+        
+        // 토큰 유효성 검증을 위해 프로필 정보 요청
+        console.log("AuthContext - 프로필 정보 요청 시작");
+        const response = await userAPI.getMyProfile();
+        console.log("AuthContext - 프로필 정보 응답:", response.data);
+        
+        setUser(response.data);
+        localStorage.setItem('user', JSON.stringify(response.data));
+      } catch (err) {
+        console.error('AuthContext - 인증 정보 검증 실패:', err);
+        logout();
       }
-      
-      setLoading(false);
-    };
-
-    loadUser();
-  }, []);
+    } else {
+      console.log("AuthContext - 저장된 사용자 정보 또는 토큰이 없음");
+    }
+    
+    setLoading(false);
+    console.log("AuthContext - 로딩 완료");
+  };
+  
+  loadUser();
+}, []);
 
   // 로그인 처리
   const login = async (email, password) => {

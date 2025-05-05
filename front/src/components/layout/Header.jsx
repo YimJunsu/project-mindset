@@ -24,7 +24,7 @@ const Header = () => {
           <Sidebar />
           <Link to="/" className="flex items-center">
             <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-orange-600">
-              마인드<span className="font-extrabold">SET</span>
+              마인드<span className="font-bold">SET</span>
             </h1>
           </Link>
         </div>
