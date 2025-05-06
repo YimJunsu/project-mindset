@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mindset.mapper.WorkoutRecordMapper">
+
+    <!-- Create a new workout record -->
+    <insert id="createWorkRecord" parameterType="com.mindset.model.dto.WorkoutRecord">
+        INSERT INTO workout_records (
+        user_id,
+        workout_type,
+        duration,
+        calories,
+        workout_date,
+        memo,
+        created_at
+        )
+        VALUES (
+        #{userId},
+        #{workoutType},
+        #{duration},
+        #{calories},
+        #{workoutDate},
+        #{memo},
+        #{createdAt}
+        )
+    </insert>
+
+    <!-- Find all workout records by userId -->
+    <select id="findAllByUserId" resultType="com.mindset.model.dto.WorkoutRecord">
+        SELECT
+        workout_id,
+        user_id,
+        workout_type,
+        duration,
+        calories,
+        workout_date,
+        memo,
+        created_at
+        FROM workout_records
+        WHERE user_id = #{userId}
+        ORDER BY workout_date DESC
+    </select>
+
+    <!-- Find a specific workout record by recordId -->
+    <select id="findByWorkRecordId" resultType="com.mindset.model.dto.WorkoutRecord">
+        SELECT
+        workout_id,
+        user_id,
+        workout_type,
+        duration,
+        calories,
+        workout_date,
+        memo,
+        created_at
+        FROM workout_records
+        WHERE workout_id = #{workoutId};
+    </select>
+
+    <!-- Delete a workout record by recordId -->
+    <delete id="deleteWorkRecord" parameterType="long">
+        DELETE FROM workout_records
+        WHERE workout_id = #{workoutId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mindset.mapper.StudyRecordMapper">
+
+    <insert id="createStudyRecord" parameterType="com.mindset.model.dto.StudyRecord">
+        INSERT INTO study_records
+        (user_id, subject, duration, start_time, end_time, memo, created_at)
+        VALUES
+        (#{userId}, #{subject}, #{duration}, #{startTime}, #{endTime}, #{memo}, #{createdAt})
+    </insert>
+
+    <select id="findAllByUserId" resultType="com.mindset.model.dto.StudyRecord">
+        SELECT * FROM study_records
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findByRecordId" resultType="com.mindset.model.dto.StudyRecord">
+        SELECT * FROM study_records
+        WHERE record_id = #{recordId}
+    </select>
+
+    <delete id="deleteStudyRecord">
+        DELETE FROM study_records
+        WHERE record_id = #{recordId}
+    </delete>
+
+</mapper>

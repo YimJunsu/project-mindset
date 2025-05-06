@@ -43,7 +43,8 @@ public class SecurityConfig {
                         // 공개 기능
                         .requestMatchers("/api/timer/public/**").permitAll()
                         // /api/users는 USER 역할을 가진 사용자만 접근 가능
-                        .requestMatchers("/api/users/**", "/api/todo/**" , "/api/memo/**").hasRole("USER")
+                        .requestMatchers("/api/users/**", "/api/todo/**" , "/api/memo/**",
+                                "/api/studyrecord/**", "/api/workrecord/**").hasRole("USER")
                         // 나머지는 인증만 되면 접근 가능
                         .anyRequest().authenticated()
                 );
