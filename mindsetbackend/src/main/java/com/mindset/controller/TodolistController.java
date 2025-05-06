@@ -24,13 +24,13 @@ public class TodolistController {
 
     // 유저아이디에 해당하는 todo 전체 조회
     @GetMapping("/{userId}")
-    public List<Todolist> getTodolistByUser(@PathVariable Long userId){
+    public List<TodolistResponse> getTodolistByUser(@PathVariable Long userId){
         return todolistService.getTodolistByUesr(userId);
     }
 
     // 상세보기
     @GetMapping("/detail/{todoId}")
-    public Todolist getTodolist(@PathVariable Long todoId){
+    public TodolistResponse getTodolist(@PathVariable Long todoId){
         return todolistService.getTodolist(todoId);
     }
 

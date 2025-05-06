@@ -72,7 +72,7 @@ const TodoItem = ({ todo, onToggleStatus, onDelete, onViewDetail, getColor }) =>
         <div className="flex items-center space-x-2">
           {/* 상세 보기 버튼 */}
           <button
-            onClick={onViewDetail}
+            onClick={() => onViewDetail(todo.todoId)}
             className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 p-1"
           >
             상세보기
@@ -80,11 +80,11 @@ const TodoItem = ({ todo, onToggleStatus, onDelete, onViewDetail, getColor }) =>
           
           {/* 삭제 버튼 */}
           <button
-            onClick={onDelete}
-            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1"
-          >
-            삭제하기
-          </button>
+          onClick={() => onDelete(todo.todoId)}
+          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1"
+        >
+          삭제하기
+        </button>
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,12 +32,19 @@ public class TodolistService {
     }
 
     // 전체 조회
-    public List<Todolist> getTodolistByUesr(Long userId) {
-        return todolistMapper.findAllByUserId(userId);
+    public List<TodolistResponse> getTodolistByUesr(Long userId) {
+        List<Todolist> todolists = todolistMapper.findAllByUserId(userId);
+        List<TodolistResponse> responses = new ArrayList<>();
+
+        for(Todolist todolist : todolists){
+            responses.add(new TodolistResponse(todolist));
+        }
+        return responses;
     }
     // 특정 조회
-    public Todolist getTodolist(Long todoId){
-        return todolistMapper.findTodolistById(todoId);
+    public TodolistResponse getTodolist(Long todoId){
+        Todolist todolist = todolistMapper.findTodolistById(todoId);
+        return new TodolistResponse(todolist);
     }
 
     // 상태 수정

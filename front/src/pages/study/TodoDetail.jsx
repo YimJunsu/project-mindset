@@ -46,7 +46,6 @@ const TodoDetail = () => {
     }
   }, [todoId, user, authLoading, isAuthenticated, navigate]);
   
-  // 할 일 상세 정보 가져오기
   const fetchTodoDetail = async () => {
     try {
       setLoading(true);
@@ -55,32 +54,35 @@ const TodoDetail = () => {
       const response = await todoAPI.getTodoDetail(todoId);
       console.log("할 일 상세 응답:", response.data);
       
-      // 자신의 할 일인지 확인
-      if (response.data.userId !== user.userId) {
+      // ✅ 껍데기 벗기기
+      const todoData = response.data.todolist || response.data;
+  
+      // 권한 확인
+      if (todoData.userId !== user.userId) {
         console.error("권한이 없습니다. 다른 사용자의 할 일입니다.");
         setError("이 할 일에 접근할 권한이 없습니다.");
         setLoading(false);
         return;
       }
-      
-      setTodo(response.data);
-      setContent(response.data.content);
+  
+      setTodo(todoData);
+      setContent(todoData.content);
       setError(null);
     } catch (err) {
       console.error("할 일 상세 조회 오류:", err);
-      
-      // 401 오류인 경우 로그인 페이지로 리다이렉트
+  
       if (err.response && err.response.status === 401) {
         console.log("인증이 만료되었습니다. 로그인 페이지로 이동합니다.");
         navigate('/login');
         return;
       }
-      
+  
       setError("할 일 정보를 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
   };
+  
   
   // 할 일 내용 업데이트
   const handleUpdate = async () => {
@@ -209,7 +211,7 @@ const TodoDetail = () => {
             {error}
           </div>
           <button
-            onClick={() => navigate('/study/todo')}
+            onClick={() => navigate('/study/todolist')}
             className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
           >
             &larr; 목록으로 돌아가기

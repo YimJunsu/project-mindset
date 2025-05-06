@@ -1,6 +1,7 @@
 package com.mindset.mapper;
 
 import com.mindset.model.dto.Todolist;
+import com.mindset.model.response.TodolistResponse;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

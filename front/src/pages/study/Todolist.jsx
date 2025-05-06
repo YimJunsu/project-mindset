@@ -43,7 +43,6 @@ const Todolist = () => {
     }
   }, [user, authLoading, isAuthenticated, navigate]);
 
-  // 할 일 목록 가져오기
   const fetchTodos = async () => {
     try {
       setLoading(true);
@@ -52,12 +51,14 @@ const Todolist = () => {
       const response = await todoAPI.getTodosByUser(user.userId);
       console.log("할 일 목록 응답:", response.data);
       
-      setTodos(response.data);
+      // ✅ todolist 껍데기 벗기기
+      const todos = response.data.map(item => item.todolist);
+      
+      setTodos(todos);
       setError(null);
     } catch (err) {
       console.error("할 일 목록 조회 오류:", err);
       
-      // 401 오류인 경우 로그인 페이지로 리다이렉트
       if (err.response && err.response.status === 401) {
         console.log("인증이 만료되었습니다. 로그인 페이지로 이동합니다.");
         navigate('/login');
@@ -68,7 +69,7 @@ const Todolist = () => {
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   // 할 일 추가
   const addTodo = async (content) => {
