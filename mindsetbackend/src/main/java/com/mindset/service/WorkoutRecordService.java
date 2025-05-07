@@ -52,13 +52,13 @@ public class WorkoutRecordService {
     }
 
     // 상세 보기
-    public WorkoutRecordResponse getWorkRecord(Long recordId){
-        WorkoutRecord workoutRecord = workRecordMapper.findByWorkRecordId(recordId);
+    public WorkoutRecordResponse getWorkRecord(Long workoutId){
+        WorkoutRecord workoutRecord = workRecordMapper.findByWorkRecordId(workoutId);
         return new WorkoutRecordResponse(workoutRecord);
     }
 
     // 삭제
-    public void deleteWorkRecord(Long recordId){
-        workRecordMapper.deleteWorkRecord(recordId);
+    public void deleteWorkRecord(Long workoutId){
+        workRecordMapper.deleteWorkRecord(workoutId);
     }
 }

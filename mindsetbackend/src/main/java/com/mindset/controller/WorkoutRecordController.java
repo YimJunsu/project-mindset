@@ -24,14 +24,14 @@ public class WorkoutRecordController {
         return workRecordService.getWorkRecordByUser(userId);
     }
     // 상세 보기
-    @GetMapping("/detail/{recordId}")
-    public WorkoutRecordResponse getWorkRecord(@PathVariable Long recordId){
-        return workRecordService.getWorkRecord(recordId);
+    @GetMapping("/detail/{workoutId}")
+    public WorkoutRecordResponse getWorkRecord(@PathVariable Long workoutId){
+        return workRecordService.getWorkRecord(workoutId);
     }
     // 수정은 없음.
     // 삭제
-    @DeleteMapping("/{recordId}")
-    public void deleteWorkRecord(@PathVariable Long recordId){
-        workRecordService.deleteWorkRecord(recordId);
+    @DeleteMapping("/{workoutId}")
+    public void deleteWorkRecord(@PathVariable Long workoutId){
+        workRecordService.deleteWorkRecord(workoutId);
     }
 }

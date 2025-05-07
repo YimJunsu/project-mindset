@@ -11,9 +11,9 @@ public interface WorkoutRecordMapper {
 
     List<WorkoutRecord> findAllByUserId(Long userId);
 
-    WorkoutRecord findByWorkRecordId(Long recordId);
+    WorkoutRecord findByWorkRecordId(Long workoutId);
 
-    public void deleteWorkRecord(Long recordId);
+    public void deleteWorkRecord(Long workoutId);
 
 
 }

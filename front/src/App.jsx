@@ -13,6 +13,16 @@ import TodoDetail from './pages/study/TodoDetail';
 import Todolist from './pages/study/Todolist';
 import NotFound from './pages/NotFound';
 
+// 공부 기록 페이지
+import StudyRecord from './pages/study/StudyRecord';
+import StudyRecordDetail from './pages/study/StudyRecordDetail';
+import NewStudyRecord from './pages/study/NewStudyRecord';
+
+// 운동 기록 페이지
+import WorkoutRecord from './pages/workout/WorkoutRecord';
+import WorkoutRecordDetail from './pages/workout/WorkoutRecordDetail';
+import NewWorkoutRecord from './pages/workout/NewWorkoutRecord';
+
 // 레이아웃 컴포넌트
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -29,12 +39,13 @@ const App = () => {
             <Header />
             <main className="flex-grow">
               <Routes>
-                {/* 공용 접근 가능 */}
+                {/* ===== 공용 접근 가능 ===== */}
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/study/timer" element={<TimerPage />} />
-                {/* 로그인 사용자만 접근 가능 */}
+                
+                {/* ===== 마이페이지 ===== */}
                 <Route
                   path="/mypage"
                   element={
@@ -43,6 +54,8 @@ const App = () => {
                     </PrivateRoute>
                   }
                 />
+                
+                {/* ===== 투두리스트 관련 라우트 ===== */}
                 <Route
                   path="/study/todolist"
                   element={
@@ -51,12 +64,68 @@ const App = () => {
                     </PrivateRoute>
                   }
                 />
-                <Route path="/study/todo/detail/:todoId" element={
-                <PrivateRoute>
-                  <TodoDetail />
-                </PrivateRoute>
-              } />
-                {/* 404 처리 */}
+                <Route 
+                  path="/study/todo/detail/:todoId" 
+                  element={
+                    <PrivateRoute>
+                      <TodoDetail />
+                    </PrivateRoute>
+                  } 
+                />
+                
+                {/* ===== 공부 기록 관련 라우트 ===== */}
+                <Route
+                  path="/study/record"
+                  element={
+                    <PrivateRoute>
+                      <StudyRecord />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/study/record/new"
+                  element={
+                    <PrivateRoute>
+                      <NewStudyRecord />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/study/record/:recordId"
+                  element={
+                    <PrivateRoute>
+                      <StudyRecordDetail />
+                    </PrivateRoute>
+                  }
+                />
+                
+                {/* ===== 운동 기록 관련 라우트 ===== */}
+                <Route
+                  path="/workout/record"
+                  element={
+                    <PrivateRoute>
+                      <WorkoutRecord />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/workout/record/new"
+                  element={
+                    <PrivateRoute>
+                      <NewWorkoutRecord />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/workout/record/:workoutId"
+                  element={
+                    <PrivateRoute>
+                      <WorkoutRecordDetail />
+                    </PrivateRoute>
+                  }
+                />
+                
+                {/* ===== 404 처리 ===== */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

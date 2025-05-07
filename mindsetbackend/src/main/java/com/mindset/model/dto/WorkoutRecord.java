@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkoutRecord {
-    private long recordId; // 운동 기록 PK
+    private long workoutId; // 운동 기록 PK
     private long userId; // 사용자 FK
     private String workoutType; // 운동 종류
     private int duration; // 운동 시간 (분 단위)

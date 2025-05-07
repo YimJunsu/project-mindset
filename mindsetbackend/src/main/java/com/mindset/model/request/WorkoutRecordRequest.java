@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WorkoutRecordRequest {
-    private long recordId;          // 운동 기록 PK (수정이나 삭제 시 필요)
+    private long workoutId;          // 운동 기록 PK (수정이나 삭제 시 필요)
     private long userId;            // 사용자 FK
     private String workoutType;     // 운동 종류 (예: "Running", "Cycling")
     private int duration;           // 운동 시간 (분 단위)

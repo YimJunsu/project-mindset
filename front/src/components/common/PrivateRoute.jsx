@@ -8,7 +8,7 @@ const PrivateRoute = ({ children }) => {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      alert('회원만 접근이 가능합니다!');
+      alert('서비스를 이용하시려면 로그인을 해주세요!');
       setShouldRedirect(true);
     }
   }, [loading, isAuthenticated]);
