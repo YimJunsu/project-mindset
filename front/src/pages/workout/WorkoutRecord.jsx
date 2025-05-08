@@ -100,62 +100,63 @@ const WorkoutRecord = () => {
   };
 
   return (
-    <div className={`container mx-auto px-4 py-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">운동 기록</h1>
-        <button 
-          onClick={handleAddRecord}
-          className="px-4 py-2 text-white rounded transition-colors duration-300"
-          style={{ backgroundColor: getColor('primary') }}
-        >
-          기록 추가
-        </button>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 p-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-8 border-b pb-4 border-gray-300 dark:border-gray-700">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">운동 기록</h1>
+            <button 
+              onClick={handleAddRecord}
+              className="px-4 py-2 text-white rounded transition-colors duration-300"
+              style={{ backgroundColor: getColor('primary') }}
+            >
+              기록 추가
+            </button>
+          </div>
+        
+        {loading ? (
+            <div className="flex justify-center p-12">
+              <p>로딩 중...</p>
+            </div>
+          ) : records && records.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {records.map((record, index) => (
+                <div 
+                  key={record.workoutId || `record-${index}`}
+                  onClick={() => handleCardClick(record)}
+                  className={`w-full rounded-xl shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-lg ${
+                    darkMode 
+                      ? 'bg-gray-800 hover:bg-gray-700 text-white' 
+                      : 'bg-white hover:bg-gray-50 text-gray-800'
+                  }`}
+                >
+                  <h3 className="text-lg font-semibold mb-1 truncate">{record.workoutType || "제목 없음"}</h3>
+                  <div className="text-sm font-medium mb-2 text-orange-500">
+                    {`${formatDuration(record.duration || 0)} • ${record.calories || 0}kcal`}
+                  </div>
+                  <div className={`text-sm mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    {record.memo ? (record.memo.length > 50 ? record.memo.substring(0, 50) + '...' : record.memo) : '메모 없음'}
+                  </div>
+                  <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {formatDate(record.workoutDate)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+          <div className="text-center py-12">
+            <p className="text-lg text-gray-700 dark:text-gray-300">아직 기록이 없습니다. 첫 운동 기록을 추가해보세요!</p>
+            <button 
+              onClick={handleAddRecord}
+              className="mt-4 px-4 py-2 text-white rounded transition-colors duration-300"
+              style={{ backgroundColor: getColor('primary') }}
+            >
+              기록 추가하기
+            </button>
+          </div>
+        )}
       </div>
-      
-      {loading ? (
-          <div className="flex justify-center p-12">
-            <p>로딩 중...</p>
-          </div>
-        ) : records && records.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {console.log("렌더링 시도:", records)}
-            {records.map((record, index) => (
-              <div 
-                key={record.workoutId || `record-${index}`}
-                onClick={() => handleCardClick(record)}
-                className={`w-full rounded-xl shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-lg ${
-                  darkMode 
-                    ? 'bg-gray-800 hover:bg-gray-700 text-white' 
-                    : 'bg-white hover:bg-gray-50 text-gray-800'
-                }`}
-              >
-                <h3 className="text-lg font-semibold mb-1 truncate">{record.workoutType || "제목 없음"}</h3>
-                <div className="text-sm font-medium mb-2 text-orange-500">
-                  {`${formatDuration(record.duration || 0)} • ${record.calories || 0}kcal`}
-                </div>
-                <div className={`text-sm mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  {record.memo ? (record.memo.length > 50 ? record.memo.substring(0, 50) + '...' : record.memo) : '메모 없음'}
-                </div>
-                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {formatDate(record.workoutDate)}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-        <div className="text-center py-12">
-          <p className="text-lg">아직 기록이 없습니다. 첫 운동 기록을 추가해보세요!</p>
-          <button 
-            onClick={handleAddRecord}
-            className="mt-4 px-4 py-2 text-white rounded transition-colors duration-300"
-            style={{ backgroundColor: getColor('primary') }}
-          >
-            기록 추가하기
-          </button>
-        </div>
-      )}
     </div>
-  );
+  );  
 };
 
 export default WorkoutRecord;

@@ -1,4 +1,3 @@
-// src/pages/study/StudyRecordDetail.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
@@ -7,32 +6,21 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
 const StudyRecordDetail = () => {
-  // useParams를 사용하여 URL 파라미터 추출
-  const params = useParams();
-  console.log('URL 파라미터:', params); // 디버깅을 위해 로그 추가
-  
-  const { recordId } = params;
+  const { recordId } = useParams();
   const [record, setRecord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { darkMode, getColor } = useTheme();
   const navigate = useNavigate();
 
-  // 시간 형식 변환 함수
   const formatDuration = (minutes) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    
-    if (hours > 0) {
-      return `${hours}시간 ${mins > 0 ? `${mins}분` : ''}`;
-    }
-    return `${mins}분`;
+    return hours > 0 ? `${hours}시간 ${mins > 0 ? `${mins}분` : ''}` : `${mins}분`;
   };
 
-  // 날짜 형식 변환 함수
   const formatDate = (dateString) => {
     if (!dateString) return "날짜 정보 없음";
-    
     try {
       return format(new Date(dateString), 'yyyy년 MM월 dd일 (eee) HH:mm', { locale: ko });
     } catch (error) {
@@ -42,7 +30,6 @@ const StudyRecordDetail = () => {
   };
 
   useEffect(() => {
-    console.log('recordId 확인:', recordId);
     if (recordId) {
       loadRecord();
     } else {
@@ -54,15 +41,8 @@ const StudyRecordDetail = () => {
   const loadRecord = async () => {
     try {
       setLoading(true);
-      console.log('기록 조회 시도 - ID:', recordId);
-      
       const response = await studyRecordAPI.getStudyRecord(recordId);
-      console.log('응답 데이터:', response.data);
-      
-      // ✅ 껍데기 벗기기
       const recordData = response.data.studyRecord || response.data;
-      console.log('껍데기 벗긴 데이터:', recordData);
-      
       setRecord(recordData);
     } catch (err) {
       console.error('공부 기록 조회 실패:', err);
@@ -74,7 +54,6 @@ const StudyRecordDetail = () => {
 
   const handleDelete = async () => {
     if (!window.confirm('정말로 이 기록을 삭제하시겠습니까?')) return;
-    
     try {
       await studyRecordAPI.deleteStudyRecord(recordId);
       navigate('/study/record');
@@ -86,62 +65,70 @@ const StudyRecordDetail = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p>로딩 중...</p>
+      <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <p className="text-gray-600 dark:text-gray-300">로딩 중...</p>
       </div>
     );
   }
 
   if (error || !record) {
     return (
-      <div className="max-w-2xl mx-auto my-12 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-        <div className="text-center py-8">
-          <p className="text-red-500 dark:text-red-400 mb-4">{error || '기록을 찾을 수 없습니다.'}</p>
-          <button
-            onClick={() => navigate('/study/record')}
-            className="px-4 py-2 text-white rounded"
-            style={{ backgroundColor: getColor('primary') }}
-          >
-            돌아가기
-          </button>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 p-4">
+        <div className="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+          <div className="text-center py-8">
+            <p className="text-red-500 dark:text-red-400 mb-4">{error || '기록을 찾을 수 없습니다.'}</p>
+            <button
+              onClick={() => navigate('/study/record')}
+              className="px-4 py-2 text-white rounded"
+              style={{ backgroundColor: getColor('primary') }}
+            >
+              돌아가기
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`max-w-3xl mx-auto my-12 p-6 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'} rounded-lg shadow-md`}>
-      <h1 className="text-2xl font-bold mb-6 pb-4 border-b border-gray-300 dark:border-gray-700">
-        {record.subject || '제목 없음'}
-      </h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 p-4">
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-8 border-b pb-4 border-gray-300 dark:border-gray-700">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {record.subject || '제목 없음'}
+          </h1>
+        </div>
 
-      <div className="space-y-4 mb-8">
-        <InfoRow label="학습 시간" value={formatDuration(record.duration || 0)} />
-        <InfoRow label="시작 시간" value={record.startTime ? formatDate(record.startTime) : '-'} />
-        <InfoRow label="종료 시간" value={record.endTime ? formatDate(record.endTime) : '-'} />
-        <InfoRow label="작성일" value={record.createdAt ? formatDate(record.createdAt) : '-'} />
-        
-        <div className="pt-4">
-          <h2 className="text-md font-medium mb-2 text-gray-700 dark:text-gray-300">메모</h2>
-          <div className={`p-4 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            {record.memo || '메모가 없습니다.'}
+        <div className={`p-6 rounded-lg shadow-md ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
+          <div className="space-y-4 mb-8">
+            <InfoRow label="학습 시간" value={formatDuration(record.duration || 0)} />
+            <InfoRow label="시작 시간" value={formatDate(record.startTime)} />
+            <InfoRow label="종료 시간" value={formatDate(record.endTime)} />
+            <InfoRow label="작성일" value={formatDate(record.createdAt)} />
+
+            <div className="pt-4">
+              <h2 className="text-md font-medium mb-2 text-gray-700 dark:text-gray-300">메모</h2>
+              <div className={`p-4 rounded-md ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                {record.memo || '메모가 없습니다.'}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex space-x-4 mt-8">
+            <button
+              onClick={() => navigate('/study/record')}
+              className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-600"
+            >
+              목록으로
+            </button>
+            <button
+              onClick={handleDelete}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              삭제하기
+            </button>
           </div>
         </div>
-      </div>
-
-      <div className="flex space-x-4 mt-8">
-        <button
-          onClick={() => navigate('/study/record')}
-          className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-600"
-        >
-          목록으로
-        </button>
-        <button
-          onClick={handleDelete}
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-        >
-          삭제하기
-        </button>
       </div>
     </div>
   );

@@ -241,7 +241,7 @@ const TodoDetail = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-40 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 p-4">
       <div className="max-w-2xl mx-auto">
         {/* 할 일 상세 정보 */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border dark:border-gray-700">
