@@ -23,6 +23,12 @@ import WorkoutRecord from './pages/workout/WorkoutRecord';
 import WorkoutRecordDetail from './pages/workout/WorkoutRecordDetail';
 import NewWorkoutRecord from './pages/workout/NewWorkoutRecord';
 
+// 메모 페이지
+import Memo from './pages/memo/Memo';
+import MemoList from './pages/memo/MemoList';
+import MemoSave from './pages/memo/MemoSave';
+import MemoDetail from './pages/memo/MemoDetail';
+
 // 레이아웃 컴포넌트
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -72,6 +78,25 @@ const App = () => {
                     </PrivateRoute>
                   } 
                 />
+                
+                {/* ===== 메모 관련 라우트 ===== */}
+                <Route
+                  path="/memo"
+                  element={
+                    <PrivateRoute>
+                      <Memo />
+                    </PrivateRoute>
+                  }
+                >
+                  {/* 중첩 라우트 - 메모 목록 (기본) */}
+                  <Route index element={<MemoList />} />
+                  
+                  {/* 중첩 라우트 - 메모 작성 */}
+                  <Route path="save" element={<MemoSave />} />
+                  
+                  {/* 중첩 라우트 - 메모 상세 */}
+                  <Route path="detail/:memoId" element={<MemoDetail />} />
+                </Route>
                 
                 {/* ===== 공부 기록 관련 라우트 ===== */}
                 <Route

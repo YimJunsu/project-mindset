@@ -1,4 +1,4 @@
-// src/context/MemoAPI.jsx
+// src/context/MemoApi.jsx
 import api from './apiService';
 
 // 메모 관련 API
@@ -31,6 +31,12 @@ const memoAPI = {
   deleteMemo: (memoId) => {
     console.log(`메모 삭제 API 호출 - ID: ${memoId}`);
     return api.delete(`/memo/${memoId}`);
+  },
+  
+  // 메모 개수 확인 (사용자별)
+  getMemoCount: (userId) => {
+    console.log(`메모 개수 확인 API 호출 - 사용자 ID: ${userId}`);
+    return api.get(`/memo/count/${userId}`);
   }
 };
 

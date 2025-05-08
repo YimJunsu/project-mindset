@@ -32,6 +32,7 @@ const Sidebar = () => {
                 <Link to="/study/Todolist" onClick={toggleSidebar} className="block hover:text-orange-500">ToDoList</Link>
                 <Link to="/study/record" onClick={toggleSidebar} className="block hover:text-orange-500">공부기록</Link>
                 <Link to="/questions" onClick={toggleSidebar} className="block hover:text-orange-500">질문</Link>
+                <Link to="/memo" onClick={toggleSidebar} className="block hover:text-orange-500">메모</Link>
               </div>
             )}
           </div>
