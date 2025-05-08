@@ -18,6 +18,15 @@
         VALUES (#{userId}, #{title}, #{content}, #{category})
     </insert>
 
+    <!-- 수정 -->
+    <update id="updateMemo" parameterType="com.mindset.model.dto.Memo">
+        UPDATE memos
+        SET title = #{title},
+        content = #{content},
+        category = #{category}
+        WHERE memo_id = #{memoId}
+    </update>
+
     <!-- 삭제 -->
     <delete id="deleteMemo" parameterType="long">
         DELETE FROM memos WHERE memo_id = #{memoId}

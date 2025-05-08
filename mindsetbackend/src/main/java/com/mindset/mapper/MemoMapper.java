@@ -14,5 +14,7 @@ public interface MemoMapper {
 
     void createMemo(Memo memo);
 
+    void updateMemo(Memo memo);
+
     void deleteMemo(Long memoId);
 }
