@@ -34,7 +34,7 @@ public class JwtTokenProvider {
 
     private Key getSigningKey() {
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyBytes); // 고정 키 사용
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String createToken(Authentication authentication) {
@@ -42,11 +42,17 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
+        // 소셜 로그인인 경우 CustomOAuth2User를 확인
+        String subject = authentication.getName();
+
+        // 디버깅 로그 추가
+        log.debug("JWT 토큰 생성 - Subject: {}, 권한: {}", subject, authorities);
+
         long now = (new Date()).getTime();
         Date validity = new Date(now + this.tokenValidityInMilliseconds);
 
         return Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(subject)
                 .claim("auth", authorities)
                 .setIssuedAt(new Date(now))
                 .setExpiration(validity)
@@ -61,11 +67,16 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
 
+        String subject = claims.getSubject();
+
+        // 디버깅 로그 추가
+        log.debug("JWT 토큰 검증 - Subject: {}", subject);
+
         List<GrantedAuthority> authorities = Arrays.stream(claims.get("auth").toString().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        UserDetails principal = new User(subject, "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 

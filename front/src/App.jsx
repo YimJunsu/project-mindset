@@ -7,6 +7,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import OAuthCallback from './pages/OAuthCallback'; // 추가: OAuth 콜백 컴포넌트
 import MyPage from './pages/MyPage';
 import TimerPage from './pages/study/Timer';
 import TodoDetail from './pages/study/TodoDetail';
@@ -50,6 +51,9 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/study/timer" element={<TimerPage />} />
+                
+                {/* ===== OAuth 콜백 ===== */}
+                <Route path="/oauth/callback" element={<OAuthCallback />} />
                 
                 {/* ===== 마이페이지 ===== */}
                 <Route

@@ -58,4 +58,19 @@ public class AuthController {
 
         return ResponseEntity.ok(authResponse);
     }
+
+    // OAuth2 로그인 URL 엔드포인트
+    @GetMapping("/oauth2/kakao/login")
+    public ResponseEntity<String> getKakaoLoginUrl() {
+        String loginUrl = "/oauth2/authorization/kakao";
+        log.info("카카오 로그인 URL 요청: {}", loginUrl);
+        return ResponseEntity.ok(loginUrl);
+    }
+
+    @GetMapping("/oauth2/naver/login")
+    public ResponseEntity<String> getNaverLoginUrl() {
+        String loginUrl = "/oauth2/authorization/naver";
+        log.info("네이버 로그인 URL 요청: {}", loginUrl);
+        return ResponseEntity.ok(loginUrl);
+    }
 }

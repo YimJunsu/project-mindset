@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mindset.mapper.UserMapper">
 
-    <!-- 사용자 결과 매핑 -->
+    <!-- 사용자 결과 매핑 (OAuth 필드 추가) -->
     <resultMap id="UserResultMap" type="com.mindset.model.dto.User">
         <id property="userId" column="user_id" />
         <result property="email" column="email" />
@@ -17,13 +17,15 @@
         <result property="role" column="role" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
+        <result property="oauthProvider" column="oauth_provider" />
+        <result property="oauthProviderId" column="oauth_provider_id" />
     </resultMap>
 
-    <!-- 공통 사용자 칼럼 -->
+    <!-- 공통 사용자 칼럼 (OAuth 필드 추가) -->
     <sql id="userColumns">
         user_id, email, password, nickname, gender, phone,
         address, address_detail, post_code, profile_image, role,
-        created_at, updated_at
+        created_at, updated_at, oauth_provider, oauth_provider_id
     </sql>
 
     <!-- 이메일로 사용자 조회 -->
@@ -38,6 +40,14 @@
         SELECT <include refid="userColumns" />
         FROM users
         WHERE user_id = #{userId}
+    </select>
+
+    <!-- OAuth 제공자와 제공자 ID로 사용자 조회 -->
+    <select id="findByOAuth" resultMap="UserResultMap">
+        SELECT <include refid="userColumns" />
+        FROM users
+        WHERE oauth_provider = #{provider}
+        AND oauth_provider_id = #{providerId}
     </select>
 
     <!-- 모든 사용자 조회 -->
@@ -58,6 +68,37 @@
         )
     </insert>
 
+    <!-- OAuth 사용자 정보 저장 -->
+    <insert id="saveOAuthUser" parameterType="com.mindset.model.dto.User" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO users (
+        email,
+        password,
+        nickname,
+        gender,
+        phone,
+        address,
+        address_detail,
+        post_code,
+        profile_image,
+        role,
+        oauth_provider,
+        oauth_provider_id
+        ) VALUES (
+        #{email},
+        #{password},
+        #{nickname},
+        #{gender},
+        #{phone},
+        #{address},
+        #{addressDetail},
+        #{postCode},
+        IFNULL(#{profileImage}, 'default.png'),
+        #{role},
+        #{oauthProvider},
+        #{oauthProviderId}
+        )
+    </insert>
+
     <!-- 사용자 정보 수정 -->
     <update id="update" parameterType="com.mindset.model.dto.User">
         UPDATE users
@@ -71,6 +112,23 @@
         profile_image = IFNULL(#{profileImage}, profile_image),
         updated_at = NOW()
         WHERE user_id = #{userId}
+    </update>
+
+    <!-- OAuth 사용자 정보 업데이트 -->
+    <update id="updateOAuthInfo" parameterType="com.mindset.model.dto.User">
+        UPDATE users
+        SET
+        oauth_provider = #{oauthProvider},
+        oauth_provider_id = #{oauthProviderId},
+        <if test="nickname != null and nickname != ''">
+            nickname = #{nickname},
+        </if>
+        <if test="profileImage != null and profileImage != ''">
+            profile_image = #{profileImage},
+        </if>
+        updated_at = NOW()
+        WHERE
+        user_id = #{userId}
     </update>
 
     <!-- 사용자 삭제 -->

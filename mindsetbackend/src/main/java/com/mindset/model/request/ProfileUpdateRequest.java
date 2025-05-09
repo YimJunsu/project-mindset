@@ -1,18 +1,19 @@
 package com.mindset.model.request;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProfileUpdateRequest {
-    private String nickname;       // 닉네임
-    private String phone;          // 전화번호
-    private String address;        // 기본 주소
-    private String addressDetail;  // 상세 주소
-    private String postCode;       // 우편번호
+    private String nickname;
+    private String gender;
+    private String phone;
+    private String address;
+    private String addressDetail;
+    private String postCode;
+    private MultipartFile profileImage; // 프로필 이미지 파일 (선택 사항)
 }

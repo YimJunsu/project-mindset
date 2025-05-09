@@ -28,4 +28,8 @@ public class User {
     private String role;           // 권한 역할
     private LocalDateTime createdAt;    // 계정 생성일
     private LocalDateTime updatedAt;    // 정보 수정일
+
+    // OAuth2 관련 필드 추가
+    private String oauthProvider;    // OAuth 제공자 (KAKAO, NAVER 등)
+    private String oauthProviderId;  // OAuth 제공자의 사용자 ID
 }

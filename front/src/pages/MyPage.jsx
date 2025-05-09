@@ -9,6 +9,7 @@ const MyPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isOAuthUser, setIsOAuthUser] = useState(false);
 
   const { logout } = useAuth();
   const { getColor } = useTheme();
@@ -16,6 +17,7 @@ const MyPage = () => {
 
   const [formData, setFormData] = useState({
     nickname: '',
+    gender: 'N',
     phone: '',
     address: '',
     addressDetail: '',
@@ -27,8 +29,13 @@ const MyPage = () => {
       setLoading(true);
       const res = await userAPI.getMyProfile();
       setUserData(res.data);
+      
+      // OAuth 사용자 여부 확인
+      setIsOAuthUser(res.data.oauthProvider != null);
+      
       setFormData({
         nickname: res.data.nickname || '',
+        gender: res.data.gender || 'N',
         phone: res.data.phone || '',
         address: res.data.address || '',
         addressDetail: res.data.addressDetail || '',
@@ -55,6 +62,7 @@ const MyPage = () => {
     if (isEditing && userData) {
       setFormData({
         nickname: userData.nickname || '',
+        gender: userData.gender || 'N',
         phone: userData.phone || '',
         address: userData.address || '',
         addressDetail: userData.addressDetail || '',
@@ -64,11 +72,34 @@ const MyPage = () => {
     setIsEditing(prev => !prev);
   };
 
+  const handleAddressSearch = () => {
+    new window.daum.Postcode({
+      oncomplete: function (data) {
+        const fullAddress = data.roadAddress || data.jibunAddress;
+        setFormData(prev => ({
+          ...prev,
+          address: fullAddress,
+          postCode: data.zonecode,
+        }));
+      },
+    }).open();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await userAPI.updateProfile(formData);
+      
+      // FormData 객체 생성 (파일 업로드를 위해)
+      const form = new FormData();
+      form.append('nickname', formData.nickname);
+      form.append('gender', formData.gender);
+      form.append('phone', formData.phone || '');
+      form.append('address', formData.address || '');
+      form.append('addressDetail', formData.addressDetail || '');
+      form.append('postCode', formData.postCode || '');
+      
+      const res = await userAPI.updateProfile(form);
       setUserData(res.data);
       setIsEditing(false);
       alert('프로필이 업데이트되었습니다.');
@@ -119,6 +150,15 @@ const MyPage = () => {
     <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md my-32">
       <h1 className="text-3xl font-bold text-center mb-10 text-gray-900 dark:text-white">마이페이지</h1>
 
+      {isOAuthUser && (
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-lg">
+          <p className="font-medium">소셜 로그인으로 연결된 계정입니다.</p>
+          <p className="text-sm mt-1">
+            {userData?.oauthProvider === 'KAKAO' ? '카카오' : userData?.oauthProvider} 계정과 연결되어 있습니다.
+          </p>
+        </div>
+      )}
+
       <div className="flex justify-center mb-8">
         <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-300 dark:border-gray-700">
           <img
@@ -136,15 +176,32 @@ const MyPage = () => {
           <Info label="닉네임" value={userData.nickname} underline />
           <Info
             label="성별"
-            value={userData.gender === 'M' ? '남성' : userData.gender === 'F' ? '여성' : '정보 없음'}
+            value={
+              userData.gender === 'M' 
+                ? '남성' 
+                : userData.gender === 'F' 
+                  ? '여성' 
+                  : '선택 안함'
+            }
             underline
           />
           <Info label="전화번호" value={userData.phone || '-'} underline />
           <Info
             label="주소"
-            value={`${userData.address} ${userData.addressDetail} (${userData.postCode})`}
+            value={
+              userData.address 
+                ? `${userData.address} ${userData.addressDetail || ''} (${userData.postCode || ''})`
+                : '-'
+            }
             underline
           />
+          {userData.oauthProvider && (
+            <Info
+              label="소셜 로그인"
+              value={userData.oauthProvider === 'KAKAO' ? '카카오 계정' : userData.oauthProvider}
+              underline
+            />
+          )}
 
           <div className="flex space-x-4 pt-6">
             <button
@@ -166,29 +223,140 @@ const MyPage = () => {
 
       {isEditing && (
         <form onSubmit={handleSubmit} className="space-y-6">
-          {[{ label: '이메일', name: 'email', value: userData.email, disabled: true },
-            { label: '닉네임', name: 'nickname' },
-            { label: '전화번호', name: 'phone' },
-            { label: '주소', name: 'address' },
-            { label: '상세 주소', name: 'addressDetail' },
-            { label: '우편번호', name: 'postCode' }]
-            .map(({ label, name, value, disabled }) => (
-              <div key={name}>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
+          {/* 이메일 (수정 불가) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              이메일
+            </label>
+            <input
+              type="text"
+              value={userData.email}
+              disabled
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 px-3 bg-gray-100 dark:bg-gray-700"
+            />
+          </div>
+          
+          {/* 닉네임 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              닉네임
+            </label>
+            <input
+              type="text"
+              name="nickname"
+              value={formData.nickname}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              required
+            />
+          </div>
+          
+          {/* 성별 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              성별
+            </label>
+            <div className="mt-2 space-x-4">
+              <label className="inline-flex items-center">
                 <input
-                  type="text"
-                  name={name}
-                  value={disabled ? value : formData[name]}
-                  onChange={disabled ? undefined : handleChange}
-                  disabled={disabled}
-                  className={`mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 px-3 ${
-                    disabled
-                      ? 'bg-gray-100 dark:bg-gray-700'
-                      : 'dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
-                  }`}
+                  type="radio"
+                  name="gender"
+                  value="M"
+                  checked={formData.gender === 'M'}
+                  onChange={handleChange}
+                  className="form-radio h-4 w-4 text-orange-500"
                 />
-              </div>
-            ))}
+                <span className="ml-2 text-gray-700 dark:text-gray-300">남성</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="F"
+                  checked={formData.gender === 'F'}
+                  onChange={handleChange}
+                  className="form-radio h-4 w-4 text-orange-500"
+                />
+                <span className="ml-2 text-gray-700 dark:text-gray-300">여성</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="N"
+                  checked={formData.gender === 'N'}
+                  onChange={handleChange}
+                  className="form-radio h-4 w-4 text-orange-500"
+                />
+                <span className="ml-2 text-gray-700 dark:text-gray-300">선택 안함</span>
+              </label>
+            </div>
+          </div>
+          
+          {/* 전화번호 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              전화번호
+            </label>
+            <input
+              type="text"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            />
+          </div>
+          
+          {/* 주소 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              주소
+            </label>
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                readOnly
+                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3"
+              />
+              <button
+                type="button"
+                onClick={handleAddressSearch}
+                className="mt-1 px-4 py-2 bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-gray-500"
+              >
+                주소 검색
+              </button>
+            </div>
+          </div>
+          
+          {/* 상세 주소 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              상세 주소
+            </label>
+            <input
+              type="text"
+              name="addressDetail"
+              value={formData.addressDetail}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            />
+          </div>
+          
+          {/* 우편번호 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              우편번호
+            </label>
+            <input
+              type="text"
+              name="postCode"
+              value={formData.postCode}
+              readOnly
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3"
+            />
+          </div>
 
           <div className="flex space-x-4">
             <button
