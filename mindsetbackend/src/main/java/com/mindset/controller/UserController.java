@@ -5,6 +5,7 @@ import com.mindset.model.request.ProfileUpdateRequest;
 import com.mindset.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Optional;
 
 @Slf4j
@@ -101,18 +103,17 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    /**
-     * 계정 삭제
-     */
     @DeleteMapping("/me")
-    public ResponseEntity<Void> deleteAccount() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
+    public ResponseEntity<Void> deleteAccount(Principal principal) {
+        String userIdentifier = principal.getName();
+        log.info("계정 삭제 요청: {}", userIdentifier);
 
-        log.info("계정 삭제 요청: {}", email);
-
-        userService.deleteUser(email);
-
-        return ResponseEntity.ok().build();
+        try {
+            userService.deleteUser(userIdentifier);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("계정 삭제 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

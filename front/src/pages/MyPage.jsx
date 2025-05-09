@@ -85,12 +85,13 @@ const MyPage = () => {
     }).open();
   };
 
+  // 프로필 업데이트 함수 수정
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
       
-      // FormData 객체 생성 (파일 업로드를 위해)
+      // FormData 객체 생성
       const form = new FormData();
       form.append('nickname', formData.nickname);
       form.append('gender', formData.gender);
@@ -99,29 +100,42 @@ const MyPage = () => {
       form.append('addressDetail', formData.addressDetail || '');
       form.append('postCode', formData.postCode || '');
       
+      console.log('프로필 업데이트 요청 전송 직전');
+      
+      // 직접 axios 사용 방지
       const res = await userAPI.updateProfile(form);
+      console.log('프로필 업데이트 응답:', res.data);
       setUserData(res.data);
       setIsEditing(false);
       alert('프로필이 업데이트되었습니다.');
     } catch (err) {
-      console.error(err);
-      setError('프로필 업데이트에 실패했습니다.');
+      console.error('프로필 업데이트 오류:', err);
+      // 오류 메시지에 디버깅 정보 포함
+      if (err.response) {
+        setError(`프로필 업데이트에 실패했습니다. 상태: ${err.response.status}, 메시지: ${err.response.data.message || '알 수 없는 오류'}`);
+      } else {
+        setError('프로필 업데이트에 실패했습니다: ' + err.message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // 계정 삭제 함수 수정
   const handleDeleteAccount = async () => {
     if (!window.confirm('정말로 계정을 삭제하시겠습니까? 되돌릴 수 없습니다.')) return;
 
     try {
+      console.log('계정 삭제 요청 시작');
+      // API 호출 수정
       await userAPI.deleteAccount();
+      console.log('계정 삭제 성공');
       logout();
       navigate('/');
       alert('계정이 삭제되었습니다.');
     } catch (err) {
-      console.error(err);
-      alert('계정 삭제에 실패했습니다.');
+      console.error('계정 삭제 오류:', err);
+      alert('계정 삭제에 실패했습니다: ' + (err.response?.data?.message || err.message));
     }
   };
 

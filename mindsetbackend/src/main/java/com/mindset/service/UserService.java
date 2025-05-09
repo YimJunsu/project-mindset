@@ -49,6 +49,14 @@ public class UserService implements UserDetailsService {
         return Optional.ofNullable(userMapper.findByOAuth(provider, providerId));
     }
 
+    // OAuth Provider ID로 사용자 조회 (신규 메서드)
+    private Optional<User> findByOAuthProviderId(String providerId) {
+        // 모든 OAuth 제공자에 대해 검색 (KAKAO, NAVER 등)
+        return findAllUsers().stream()
+                .filter(u -> providerId.equals(u.getOauthProviderId()))
+                .findFirst();
+    }
+
     /**
      * 모든 사용자 조회 (관리자 기능 또는 내부 사용)
      */
@@ -156,14 +164,22 @@ public class UserService implements UserDetailsService {
      * 사용자 정보 업데이트
      */
     @Transactional
-    public User updateUser(ProfileUpdateRequest updateRequest, String email) {
-        User user = userMapper.findByEmail(email);
+    public User updateUser(ProfileUpdateRequest updateRequest, String userIdentifier) {
+        // 먼저 이메일로 조회
+        User user = userMapper.findByEmail(userIdentifier);
+
+        // 이메일로 찾지 못한 경우, OAuth ID로 조회 시도
         if (user == null) {
-            throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email);
+            // OAuth 제공자 ID가 저장된 형식으로 조회
+            user = findByOAuthProviderId(userIdentifier)
+                    .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userIdentifier));
+
+            log.info("소셜 로그인 사용자 찾음: {}, 제공자: {}", user.getEmail(), user.getOauthProvider());
         }
 
         // 업데이트할 정보 설정
         user.setNickname(updateRequest.getNickname());
+        user.setGender(updateRequest.getGender());
         user.setPhone(updateRequest.getPhone());
         user.setAddress(updateRequest.getAddress());
         user.setAddressDetail(updateRequest.getAddressDetail());
@@ -208,16 +224,21 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-
-
     /**
      * 프로필 이미지 업로드
      */
     @Transactional
-    public User uploadProfileImage(MultipartFile file, String email) throws IOException {
-        User user = userMapper.findByEmail(email);
+    public User uploadProfileImage(MultipartFile file, String userIdentifier) throws IOException {
+        // 먼저 이메일로 조회
+        User user = userMapper.findByEmail(userIdentifier);
+
+        // 이메일로 찾지 못한 경우, OAuth ID로 조회 시도
         if (user == null) {
-            throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email);
+            // OAuth 제공자 ID가 저장된 형식으로 조회
+            user = findByOAuthProviderId(userIdentifier)
+                    .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userIdentifier));
+
+            log.info("소셜 로그인 사용자 찾음: {}, 제공자: {}", user.getEmail(), user.getOauthProvider());
         }
 
         // 파일 저장 경로
@@ -255,9 +276,14 @@ public class UserService implements UserDetailsService {
      */
     @Transactional
     public void deleteUser(String email) {
+        // 먼저 이메일로 조회
         User user = userMapper.findByEmail(email);
+
+        // 이메일로 찾지 못한 경우, OAuth ID로 조회 시도
         if (user == null) {
-            throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email);
+            // OAuth 제공자 ID가 저장된 형식으로 조회
+            user = findByOAuthProviderId(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
         }
 
         userMapper.deleteById(user.getUserId());
