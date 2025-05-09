@@ -57,3 +57,6 @@ application-*.yml
 .env
 /config
 /secrets
+
+# 업로드된 파일 디렉토리 제외
+/uploads/

@@ -5,6 +5,7 @@ import com.mindset.model.request.ProfileUpdateRequest;
 import com.mindset.model.dto.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,6 +28,12 @@ public class UserService implements UserDetailsService {
 
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${file.upload-dir}")
+    private String uploadBaseDir;
+
+    @Value("${file.profile-image-dir}")
+    private String profileImageDir;
 
     /**
      * 이메일로 사용자 조회
@@ -202,7 +209,7 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * OAuth 사용자 정보 업데이트 (개별 파라미터 버전)
+     * OAuth 사용자 정보 업데이트 - 마이페이지랑 무관
      */
     @Transactional
     public User updateOAuthUser(Long userId, String nickname, String provider, String providerId) {
@@ -241,8 +248,8 @@ public class UserService implements UserDetailsService {
             log.info("소셜 로그인 사용자 찾음: {}, 제공자: {}", user.getEmail(), user.getOauthProvider());
         }
 
-        // 파일 저장 경로
-        String uploadDir = "uploads/profile-images";
+        // 파일 저장 경로 - properties 설정 사용
+        String uploadDir = uploadBaseDir + "/" + profileImageDir;
         File uploadPath = new File(uploadDir);
 
         if (!uploadPath.exists()) {

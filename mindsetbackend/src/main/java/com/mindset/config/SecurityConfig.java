@@ -62,6 +62,8 @@ public class SecurityConfig {
                         // 회원가입, 로그인, cheerup, 공개 리소스는 모두 접근 허용
                         .requestMatchers("/api/auth/**", "/api/cheerup/**", "/api/oauth2/**", "/oauth2/authorization/**",
                                 "/login/oauth2/code/**", "/", "/error").permitAll()
+                        // 정적 리소스 접근 허용 (추가)
+                        .requestMatchers("/uploads/**").permitAll()
                         // 공개 기능
                         .requestMatchers("/api/timer/public/**").permitAll()
                         // 사용자 프로필 API

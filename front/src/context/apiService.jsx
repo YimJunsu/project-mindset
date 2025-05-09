@@ -1,9 +1,17 @@
 import axios from 'axios';
 
-// 백엔드 서버 기본 URL
-const BACKEND_URL = 'http://localhost:8080';
-// API 기본 URL
-const API_BASE_URL = `${BACKEND_URL}/api`;
+// 환경 변수에서 URL 가져오기
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE_PATH = import.meta.env.VITE_API_BASE_PATH || '/api';
+const API_BASE_URL = `${BACKEND_URL}${API_BASE_PATH}`;
+
+// 환경 변수 로딩 확인 (디버깅용)
+console.log('apiService.jsx - 환경 변수 로드됨:', {
+  VITE_API_URL: import.meta.env.VITE_API_URL,
+  VITE_API_BASE_PATH: import.meta.env.VITE_API_BASE_PATH,
+  VITE_UPLOADS_PATH: import.meta.env.VITE_UPLOADS_PATH,
+  VITE_PROFILE_IMAGES_PATH: import.meta.env.VITE_PROFILE_IMAGES_PATH
+});
 
 // axios 인스턴스 생성
 const api = axios.create({
@@ -71,6 +79,42 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// 이미지 URL 유틸리티 함수 추가
+export const getImageUrl = (imagePath) => {
+  console.log('getImageUrl 호출됨:', imagePath);
+  
+  if (!imagePath) {
+    console.log('이미지 경로 없음, 기본 이미지 반환');
+    return '/default.png';
+  }
+  
+  // 이미 http:// 또는 https://로 시작하는 경우 그대로 사용
+  if (imagePath.startsWith('http')) {
+    console.log('이미 HTTP URL임, 그대로 반환:', imagePath);
+    return imagePath;
+  }
+  
+  // default.png인 경우 그대로 사용
+  if (imagePath === 'default.png') {
+    console.log('기본 이미지 경로임, 그대로 반환');
+    return '/default.png';
+  }
+  
+  // 환경 변수에서 경로 가져오기
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  const uploadsPath = import.meta.env.VITE_UPLOADS_PATH || 'uploads';
+  const profileImagesPath = import.meta.env.VITE_PROFILE_IMAGES_PATH || 'profile-images';
+  
+  console.log('환경 변수 값:', { apiUrl, uploadsPath, profileImagesPath });
+  
+  // 서버 URL과 함께 사용
+  const fullUrl = `${apiUrl}/${uploadsPath}/${profileImagesPath}/${imagePath}`;
+  console.log('생성된 이미지 URL:', fullUrl);
+  
+  // 캐싱 방지용 타임스탬프 추가
+  return `${fullUrl}?t=${new Date().getTime()}`;
+};
 
 // 인증 관련 API
 export const authAPI = {

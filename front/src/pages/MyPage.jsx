@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { userAPI } from '../context/apiService';
+import { userAPI, getImageUrl } from '../context/apiService';
 
 const MyPage = () => {
   const [userData, setUserData] = useState(null);
@@ -10,6 +10,10 @@ const MyPage = () => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isOAuthUser, setIsOAuthUser] = useState(false);
+  // 프로필 이미지 관련 상태 추가
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const fileInputRef = useRef(null);
 
   const { logout } = useAuth();
   const { getColor } = useTheme();
@@ -68,6 +72,9 @@ const MyPage = () => {
         addressDetail: userData.addressDetail || '',
         postCode: userData.postCode || '',
       });
+      // 편집 모드 종료 시 파일 선택 및 미리보기 초기화
+      setSelectedFile(null);
+      setPreviewImage(null);
     }
     setIsEditing(prev => !prev);
   };
@@ -85,13 +92,73 @@ const MyPage = () => {
     }).open();
   };
 
-  // 프로필 업데이트 함수 수정
+  // 파일 선택 핸들러 추가
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      
+      // 미리보기 이미지 설정
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewImage(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // handleUploadProfileImage 메서드 수정
+  const handleUploadProfileImage = async () => {
+    if (!selectedFile) {
+      alert('이미지 파일을 선택해주세요.');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      console.log('프로필 이미지 업로드 시작:', selectedFile);
+      
+      const response = await userAPI.uploadProfileImage(selectedFile);
+      console.log('프로필 이미지 업로드 응답:', response.data);
+      
+      const updatedProfileImage = response.data.profileImage;
+      console.log('업데이트된 프로필 이미지 경로:', updatedProfileImage);
+      
+      // 사용자 데이터 업데이트
+      setUserData(prev => {
+        const newData = {
+          ...prev,
+          profileImage: updatedProfileImage
+        };
+        console.log('업데이트된 사용자 데이터:', newData);
+        return newData;
+      });
+      
+      // 상태 초기화
+      setPreviewImage(null);
+      setSelectedFile(null);
+      
+      alert('프로필 이미지가 업데이트되었습니다.');
+      await loadUser();
+    } catch (err) {
+      console.error('프로필 이미지 업로드 오류:', err);
+      alert('프로필 이미지 업로드에 실패했습니다: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 파일 선택 버튼 클릭 핸들러
+  const handleSelectFileClick = () => {
+    fileInputRef.current.click();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
       
-      // FormData 객체 생성
+      // FormData 객체 생성 (파일 업로드를 위해)
       const form = new FormData();
       form.append('nickname', formData.nickname);
       form.append('gender', formData.gender);
@@ -100,42 +167,29 @@ const MyPage = () => {
       form.append('addressDetail', formData.addressDetail || '');
       form.append('postCode', formData.postCode || '');
       
-      console.log('프로필 업데이트 요청 전송 직전');
-      
-      // 직접 axios 사용 방지
       const res = await userAPI.updateProfile(form);
-      console.log('프로필 업데이트 응답:', res.data);
       setUserData(res.data);
       setIsEditing(false);
       alert('프로필이 업데이트되었습니다.');
     } catch (err) {
-      console.error('프로필 업데이트 오류:', err);
-      // 오류 메시지에 디버깅 정보 포함
-      if (err.response) {
-        setError(`프로필 업데이트에 실패했습니다. 상태: ${err.response.status}, 메시지: ${err.response.data.message || '알 수 없는 오류'}`);
-      } else {
-        setError('프로필 업데이트에 실패했습니다: ' + err.message);
-      }
+      console.error(err);
+      setError('프로필 업데이트에 실패했습니다.');
     } finally {
       setLoading(false);
     }
   };
 
-  // 계정 삭제 함수 수정
   const handleDeleteAccount = async () => {
     if (!window.confirm('정말로 계정을 삭제하시겠습니까? 되돌릴 수 없습니다.')) return;
 
     try {
-      console.log('계정 삭제 요청 시작');
-      // API 호출 수정
       await userAPI.deleteAccount();
-      console.log('계정 삭제 성공');
       logout();
       navigate('/');
       alert('계정이 삭제되었습니다.');
     } catch (err) {
-      console.error('계정 삭제 오류:', err);
-      alert('계정 삭제에 실패했습니다: ' + (err.response?.data?.message || err.message));
+      console.error(err);
+      alert('계정 삭제에 실패했습니다.');
     }
   };
 
@@ -174,15 +228,54 @@ const MyPage = () => {
       )}
 
       <div className="flex justify-center mb-8">
-        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-300 dark:border-gray-700">
-          <img
-            src={userData?.profileImage || '/default.png'}
-            alt="프로필 이미지"
-            className="w-full h-full object-cover"
-            onError={(e) => { e.target.src = '/default.png' }}
-          />
+        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-300 dark:border-gray-700 relative">
+        {previewImage ? (
+            <img
+              src={previewImage}
+              alt="프로필 이미지 미리보기"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <img
+              src={getImageUrl(userData?.profileImage)}  // getProfileImageUrl 대신 getImageUrl 사용
+              alt="프로필 이미지"
+              className="w-full h-full object-cover"
+              onError={(e) => { e.target.src = '/default.png' }}
+            />
+          )}
+          
+          {/* 일반 회원인 경우에만 프로필 이미지 변경 버튼 표시 */}
+          {!isOAuthUser && isEditing && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                onClick={handleSelectFileClick}
+                className="px-2 py-1 bg-white text-sm text-gray-800 rounded hover:bg-gray-100"
+              >
+                사진 변경
+              </button>
+            </div>
+          )}
         </div>
       </div>
+      
+      {/* 선택된 파일이 있고, 일반 회원인 경우 업로드 버튼 표시 */}
+      {selectedFile && !isOAuthUser && isEditing && (
+        <div className="flex justify-center mb-4">
+          <button
+            onClick={handleUploadProfileImage}
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            프로필 이미지 업로드
+          </button>
+        </div>
+      )}
 
       {!isEditing && (
         <div className="space-y-6">
