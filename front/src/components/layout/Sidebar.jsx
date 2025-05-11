@@ -45,7 +45,7 @@ const Sidebar = () => {
             {workoutOpen && (
               <div className="mt-2 flex flex-col space-y-2 text-base font-normal ml-4">
                 <Link to="/workout/record" onClick={toggleSidebar} className="block hover:text-orange-500">운동기록</Link>
-                <Link to="/workout-posts" onClick={toggleSidebar} className="block hover:text-orange-500">오운완</Link>
+                <Link to="/workout/post" onClick={toggleSidebar} className="block hover:text-orange-500">오운완</Link>
                 <Link to="/workout/diet" onClick={toggleSidebar} className="block hover:text-orange-500">식단 관리</Link>
               </div>
             )}

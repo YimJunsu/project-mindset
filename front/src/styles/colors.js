@@ -11,7 +11,7 @@ export const colors = {
       dark: '#212121',  // 어두운 회색
     },
     background: {
-      light: '#FFFFFF', // 라이트 모드 배경
+      light: '#F5F5F5', // 라이트 모드 배경
       dark: '#121212',  // 다크 모드 배경
     },
     text: {

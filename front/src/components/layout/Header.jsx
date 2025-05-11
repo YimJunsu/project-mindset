@@ -34,24 +34,24 @@ const Header = () => {
           {isAuthenticated ? (
             <>
               <Link to="/mypage" className="hover:text-orange-500 transition-colors flex items-center">
-                <FaUserCircle className="mr-1" />
+                <FaUserCircle className="mr-2" />
                 마이페이지
               </Link>
               <button
                 onClick={handleLogout}
                 className="hover:text-orange-500 transition-colors flex items-center"
               >
-                <FaSignOutAlt className="mr-1" />
+                <FaSignOutAlt className="mr-2" />
                 로그아웃
               </button>
             </>
           ) : (
             <>
               <Link to="/login" className="hover:text-orange-500 transition-colors flex items-center">
-                <FaSignInAlt className="mr-1" /> 로그인
+                <FaSignInAlt className="mr-2" /> 로그인
               </Link>
               <Link to="/register" className="hover:text-orange-500 transition-colors flex items-center">
-                <FaUserPlus className="mr-1" /> 회원가입
+                <FaUserPlus className="mr-2" /> 회원가입
               </Link>
             </>
           )}

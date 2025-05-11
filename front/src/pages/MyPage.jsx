@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { userAPI, getImageUrl } from '../context/apiService';
+import workoutPostAPI from '../context/WorkoutPostApi';
 
 const MyPage = () => {
   const [userData, setUserData] = useState(null);
@@ -10,13 +11,20 @@ const MyPage = () => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isOAuthUser, setIsOAuthUser] = useState(false);
+  
   // 프로필 이미지 관련 상태 추가
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
+  
+  // 게시글 목록 관련 상태 추가
+  const [myPosts, setMyPosts] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [lastPostId, setLastPostId] = useState(null);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
 
   const { logout } = useAuth();
-  const { getColor } = useTheme();
+  const { getColor, darkMode } = useTheme();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -45,11 +53,51 @@ const MyPage = () => {
         addressDetail: res.data.addressDetail || '',
         postCode: res.data.postCode || '',
       });
+      
+      // 사용자 정보를 불러온 후 내가 작성한 게시글 목록도 불러옴
+      if (res.data.userId) {
+        loadMyPosts(res.data.userId);
+      }
     } catch (err) {
       console.error(err);
       setError('사용자 정보를 불러오지 못했습니다.');
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // 내가 쓴 게시글 목록 불러오기
+  const loadMyPosts = async (userId, reset = true) => {
+    try {
+      setPostsLoading(true);
+      const currentLastPostId = reset ? null : lastPostId;
+      
+      if (!hasMorePosts && !reset) {
+        return;
+      }
+      
+      const res = await workoutPostAPI.getUserWorkoutPosts(
+        userId, 
+        currentLastPostId, 
+        5
+      );
+      
+      const newPosts = res.data.posts;
+      
+      setMyPosts(prev => reset ? newPosts : [...prev, ...newPosts]);
+      setLastPostId(res.data.lastPostId);
+      setHasMorePosts(res.data.hasNext);
+    } catch (err) {
+      console.error('내가 쓴 게시글 불러오기 실패:', err);
+    } finally {
+      setPostsLoading(false);
+    }
+  };
+  
+  // 더 불러오기 버튼 클릭 핸들러
+  const handleLoadMorePosts = () => {
+    if (userData && userData.userId) {
+      loadMyPosts(userData.userId, false);
     }
   };
 
@@ -193,6 +241,11 @@ const MyPage = () => {
     }
   };
 
+  // 게시글 상세보기로 이동
+  const handleViewPostDetail = (postId) => {
+    navigate(`/workout/post/${postId}`);
+  };
+
   if (loading && !userData) {
     return <div className="flex justify-center items-center min-h-screen">로딩 중...</div>;
   }
@@ -215,8 +268,7 @@ const MyPage = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md my-32">
-      <h1 className="text-3xl font-bold text-center mb-10 text-gray-900 dark:text-white">마이페이지</h1>
+    <div className="max-w-4xl mx-auto p-6 mt-24 bg-white dark:bg-gray-800 rounded-lg shadow-md my-12">
 
       {isOAuthUser && (
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-lg">
@@ -483,6 +535,107 @@ const MyPage = () => {
           </div>
         </form>
       )}
+      
+      {/* 내가 쓴 게시글 섹션 추가 */}
+      <div className="mt-12 border-t pt-8 border-gray-300 dark:border-gray-700">
+        <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">
+          내가 작성한 운동 인증 게시글
+        </h2>
+        
+        {postsLoading && myPosts.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500 mx-auto"></div>
+            <p className="mt-4">게시글을 불러오는 중...</p>
+          </div>
+        ) : myPosts.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">작성한 게시글이 없습니다.</p>
+            <Link 
+              to="/workout/post/create" 
+              className="inline-block px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+              style={{ backgroundColor: getColor('primary') }}
+            >
+              새 게시글 작성하기
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-800">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      카테고리
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      제목
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      조회수
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      좋아요
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      작성일
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">
+                  {myPosts.map((post) => (
+                    <tr 
+                      key={post.workoutPost.postId} 
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition"
+                      onClick={() => handleViewPostDetail(post.workoutPost.postId)}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100">
+                          {post.workoutPost.workoutCategory || '기타'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          {post.workoutPost.title}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {post.workoutPost.viewCount}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {post.workoutPost.likeCount}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(post.workoutPost.createdAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {hasMorePosts && (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={handleLoadMorePosts}
+                  className={`px-4 py-2 rounded-lg ${
+                    postsLoading 
+                      ? 'bg-gray-300 text-gray-700 cursor-not-allowed' 
+                      : 'bg-orange-500 text-white hover:bg-orange-600'
+                  }`}
+                  disabled={postsLoading}
+                  style={{ backgroundColor: postsLoading ? undefined : getColor('primary') }}
+                >
+                  {postsLoading ? '불러오는 중...' : '더 보기'}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

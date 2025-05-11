@@ -57,7 +57,7 @@ const NewWorkoutRecord = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 mt-24 p-4">
       <div className={`max-w-3xl mx-auto p-6 rounded-lg shadow-md ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
         <div className="mb-6 border-b pb-4 border-gray-300 dark:border-gray-700">
           <h1 className="text-2xl font-bold">새 운동 기록</h1>

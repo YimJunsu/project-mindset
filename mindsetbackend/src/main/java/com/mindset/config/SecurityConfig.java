@@ -70,7 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").hasRole("USER")
                         // 다른 보호된 API들
                         .requestMatchers("/api/todo/**", "/api/memo/**",
-                                "/api/studyrecord/**", "/api/workrecord/**").hasRole("USER")
+                                "/api/studyrecord/**", "/api/workrecord/**", "/api/workout/post/**", "/api/post-likes/**").hasRole("USER")
                         // 나머지는 인증만 되면 접근 가능
                         .anyRequest().authenticated()
                 )

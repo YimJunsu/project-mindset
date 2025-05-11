@@ -30,6 +30,11 @@ import MemoList from './pages/memo/MemoList';
 import MemoSave from './pages/memo/MemoSave';
 import MemoDetail from './pages/memo/MemoDetail';
 
+// 오운완 게시판 페이지 (추가)
+import WorkoutPostListPage from './pages/workout/WorkoutPostListPage';
+import WorkoutPostCreatePage from './pages/workout/WorkoutPostCreatePage';
+import WorkoutPostDetailPage from './pages/workout/WorkoutPostDetailPage';
+
 // 레이아웃 컴포넌트
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -152,6 +157,28 @@ const App = () => {
                       <WorkoutRecordDetail />
                     </PrivateRoute>
                   }
+                />
+                
+                {/* ===== 오운완 게시판 관련 라우트 (추가) ===== */}
+                <Route
+                  path="/workout/post"
+                  element={
+                    <PrivateRoute>  
+                      <WorkoutPostListPage />
+                    </PrivateRoute>
+                    }
+                />
+                <Route
+                  path="/workout/post/create"
+                  element={
+                    <PrivateRoute>
+                      <WorkoutPostCreatePage />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/workout/post/:postId"
+                  element={<WorkoutPostDetailPage />}
                 />
                 
                 {/* ===== 404 처리 ===== */}

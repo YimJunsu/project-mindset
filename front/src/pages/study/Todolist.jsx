@@ -185,7 +185,7 @@ const Todolist = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 mt-24 p-4">
 
       <div className="max-w-4xl mx-auto">
         {/* 오류 메시지 */}

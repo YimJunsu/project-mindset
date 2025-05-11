@@ -85,7 +85,7 @@
     };
 
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 p-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 mt-24 p-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8 border-b pb-4 border-gray-300 dark:border-gray-700">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">공부 기록</h1>

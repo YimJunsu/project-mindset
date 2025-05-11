@@ -91,7 +91,7 @@ const StudyRecordDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 mt-24 p-4">
       <div className="max-w-3xl mx-auto">
         <div className="mb-8 border-b pb-4 border-gray-300 dark:border-gray-700">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">

@@ -65,11 +65,11 @@ const Memo = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 pt-28">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 mt-24">
       <div className="max-w-6xl mx-auto">
         {/* 헤더 */}
         <div className="mb-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">나의 메모</h1>
+          <h3 className="text-3xl font-bold text-gray-800 dark:text-white">나의 메모</h3>
           
           <div className="flex items-center space-x-4">
             {/* 메모 통계 정보 */}

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mindset.mapper.WorkoutPostMapper">
+
+    <!-- 결과 매핑 -->
+    <resultMap id="workoutPostResultMap" type="com.mindset.model.dto.WorkoutPost">
+        <id property="postId" column="post_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="workoutCategory" column="workout_category"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 게시글 생성 -->
+    <insert id="createWorkoutPost" parameterType="com.mindset.model.dto.WorkoutPost" useGeneratedKeys="true" keyProperty="postId">
+        INSERT INTO workout_posts (
+        user_id, title, content, workout_category, image_url,
+        view_count, like_count, created_at, updated_at
+        ) VALUES (
+        #{userId}, #{title}, #{content}, #{workoutCategory}, #{imageUrl},
+        #{viewCount}, #{likeCount}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <!-- 게시글 ID로 조회 -->
+    <select id="findWorkoutPostById" resultMap="workoutPostResultMap">
+        SELECT * FROM workout_posts WHERE post_id = #{postId}
+    </select>
+
+    <!-- 모든 게시글 조회 (무한 스크롤, 커서 기반 페이징) -->
+    <select id="findAll" resultMap="workoutPostResultMap">
+        SELECT * FROM workout_posts
+        <if test="lastPostId != null">
+            WHERE post_id &lt; #{lastPostId}
+        </if>
+        ORDER BY post_id DESC
+        LIMIT #{size}
+    </select>
+
+    <!-- 카테고리별 게시글 조회 (무한 스크롤, 커서 기반 페이징) -->
+    <select id="findAllByCategory" resultMap="workoutPostResultMap">
+        SELECT * FROM workout_posts
+        WHERE workout_category = #{category}
+        <if test="lastPostId != null">
+            AND post_id &lt; #{lastPostId}
+        </if>
+        ORDER BY post_id DESC
+        LIMIT #{size}
+    </select>
+
+    <!-- 사용자별 게시글 조회 (무한 스크롤, 커서 기반 페이징) -->
+    <select id="findAllByUserId" resultMap="workoutPostResultMap">
+        SELECT * FROM workout_posts
+        WHERE user_id = #{userId}
+        <if test="lastPostId != null">
+            AND post_id &lt; #{lastPostId}
+        </if>
+        ORDER BY post_id DESC
+        LIMIT #{size}
+    </select>
+
+    <!-- 인기 게시글 조회 (좋아요 순, 무한 스크롤, 커서 기반 페이징) -->
+    <select id="findPopularPosts" resultMap="workoutPostResultMap">
+        SELECT * FROM workout_posts
+        <if test="lastPostId != null">
+            WHERE post_id &lt; #{lastPostId}
+        </if>
+        ORDER BY like_count DESC, post_id DESC
+        LIMIT #{size}
+    </select>
+
+    <!-- 게시글 수정 -->
+    <update id="updateWorkoutPost" parameterType="com.mindset.model.dto.WorkoutPost">
+        UPDATE workout_posts SET
+        title = #{title},
+        content = #{content},
+        workout_category = #{workoutCategory},
+        image_url = #{imageUrl},
+        updated_at = #{updatedAt}
+        WHERE post_id = #{postId}
+    </update>
+
+    <!-- 게시글 삭제 -->
+    <delete id="deleteWorkoutPost">
+        DELETE FROM workout_posts WHERE post_id = #{postId}
+    </delete>
+
+    <!-- 조회수 증가 -->
+    <update id="incrementViewCount">
+        UPDATE workout_posts SET
+        view_count = view_count + 1
+        WHERE post_id = #{postId}
+    </update>
+
+    <!-- 좋아요 수 증가 -->
+    <update id="incrementLikeCount">
+        UPDATE workout_posts SET
+        like_count = like_count + 1
+        WHERE post_id = #{postId}
+    </update>
+
+    <!-- 좋아요 수 감소 -->
+    <update id="decrementLikeCount">
+        UPDATE workout_posts SET
+        like_count = GREATEST(like_count - 1, 0)
+        WHERE post_id = #{postId}
+    </update>
+</mapper>

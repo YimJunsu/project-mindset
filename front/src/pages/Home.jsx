@@ -58,7 +58,7 @@ const Home = () => {
       icon: <FaDumbbell />,
       title: "운동 관리",
       description: "운동 기록을 남기고, AI 식단 추천으로 건강한 생활을 유지하세요.",
-      link: "/workout"
+      link: "/workout/record"
     },
     {
       icon: <FaQuestion />,
@@ -70,7 +70,7 @@ const Home = () => {
       icon: <FaCamera />,
       title: "오운완 인증",
       description: "운동 완료 인증으로 동기부여를 얻고 서로 응원하세요.",
-      link: "/workout-posts"
+      link: "/workout/posts"
     }
   ];
 
